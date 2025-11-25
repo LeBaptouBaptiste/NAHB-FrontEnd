@@ -1,349 +1,379 @@
-import { useCallback, useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import { Switch } from "../components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { 
+  ArrowLeft, 
+  Save, 
+  Plus, 
+  Trash2, 
+  Upload,
+  GitBranch 
+} from "lucide-react";
 import {
-    ReactFlow,
-    MiniMap,
-    Controls,
-    Background,
-    useNodesState,
-    useEdgesState,
-    addEdge,
-    type Connection,
-    type Edge,
-    type Node,
-    BackgroundVariant,
-    BaseEdge,
-    EdgeLabelRenderer,
-    getBezierPath,
-    useReactFlow,
-    type EdgeProps,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import StoryNode from '../components/StoryNode';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import { ScrollArea } from "../components/ui/scroll-area";
 
-// --- 1. Define custom types for our Node Data ---
-interface StoryNodeData extends Record<string, unknown> {
-    title: string;
-    content: string;
-    isEnding: boolean;
-    choices: { text: string; targetPageId: string }[];
+interface Choice {
+  id: string;
+  text: string;
+  targetPage: string;
 }
 
-type TStoryNode = Node<StoryNodeData>;
+interface Page {
+  id: string;
+  title: string;
+  text: string;
+  isEnding: boolean;
+  endingLabel: string;
+  choices: Choice[];
+}
 
-// --- 2. Custom Edge Component for Editable Labels ---
-const StoryEdge = ({
-    id,
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    sourcePosition,
-    targetPosition,
-    style = {},
-    markerEnd,
-    label,
-    source,
-    target,
-}: EdgeProps) => {
-    const { setEdges, setNodes } = useReactFlow();
-    const [edgePath, labelX, labelY] = getBezierPath({
-        sourceX,
-        sourceY,
-        sourcePosition,
-        targetX,
-        targetY,
-        targetPosition,
+export function StoryEditor() {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  
+  const [storyTitle, setStoryTitle] = useState("The Forgotten Realm");
+  const [pages, setPages] = useState<Page[]>([
+    {
+      id: "1",
+      title: "Opening",
+      text: "You stand at the edge of the Forgotten Realm...",
+      isEnding: false,
+      endingLabel: "",
+      choices: [
+        { id: "c1", text: "Enter the forest", targetPage: "2" },
+        { id: "c2", text: "Go to the castle", targetPage: "3" },
+      ],
+    },
+    {
+      id: "2",
+      title: "Forest Path",
+      text: "The forest is dark and mysterious...",
+      isEnding: false,
+      endingLabel: "",
+      choices: [],
+    },
+    {
+      id: "3",
+      title: "Castle Gates",
+      text: "The castle looms before you...",
+      isEnding: false,
+      endingLabel: "",
+      choices: [],
+    },
+  ]);
+  
+  const [selectedPageId, setSelectedPageId] = useState("1");
+  
+  const selectedPage = pages.find(p => p.id === selectedPageId);
+
+  const updatePage = (updates: Partial<Page>) => {
+    setPages(pages.map(p => 
+      p.id === selectedPageId ? { ...p, ...updates } : p
+    ));
+  };
+
+  const addChoice = () => {
+    if (!selectedPage) return;
+    const newChoice: Choice = {
+      id: `c${Date.now()}`,
+      text: "New choice",
+      targetPage: pages[0]?.id || "",
+    };
+    updatePage({
+      choices: [...selectedPage.choices, newChoice],
     });
+  };
 
-    const onLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newText = event.target.value;
+  const updateChoice = (choiceId: string, updates: Partial<Choice>) => {
+    if (!selectedPage) return;
+    updatePage({
+      choices: selectedPage.choices.map(c => 
+        c.id === choiceId ? { ...c, ...updates } : c
+      ),
+    });
+  };
 
-        // 1. Update the visual edge label
-        setEdges((edges) =>
-            edges.map((e) => {
-                if (e.id === id) {
-                    return { ...e, label: newText };
-                }
-                return e;
-            })
-        );
+  const deleteChoice = (choiceId: string) => {
+    if (!selectedPage) return;
+    updatePage({
+      choices: selectedPage.choices.filter(c => c.id !== choiceId),
+    });
+  };
 
-        // 2. Update the logical choice data in the source node
-        setNodes((nodes) =>
-            nodes.map((node) => {
-                if (node.id === source) {
-                    // Update the text of the choice that points to this target
-                    const updatedChoices = (node.data.choices as any[]).map((choice) => {
-                        if (choice.targetPageId === target) {
-                            return { ...choice, text: newText };
-                        }
-                        return choice;
-                    });
-
-                    return {
-                        ...node,
-                        data: { ...node.data, choices: updatedChoices },
-                    };
-                }
-                return node;
-            })
-        );
+  const addPage = () => {
+    const newPage: Page = {
+      id: `${pages.length + 1}`,
+      title: `Page ${pages.length + 1}`,
+      text: "",
+      isEnding: false,
+      endingLabel: "",
+      choices: [],
     };
+    setPages([...pages, newPage]);
+    setSelectedPageId(newPage.id);
+  };
 
-    return (
-        <>
-            <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
-            <EdgeLabelRenderer>
-                <div
-                    style={{
-                        position: 'absolute',
-                        transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-                        pointerEvents: 'all',
-                    }}
-                    className="nodrag nopan"
-                >
-                    <input
-                        value={(label as string) || ''}
-                        onChange={onLabelChange}
-                        className="bg-gray-800 text-gray-200 text-[10px] px-2 py-1 rounded border border-gray-600 focus:border-indigo-500 outline-none w-20 text-center shadow-md transition-all focus:w-32 z-50"
-                        placeholder="Action..."
-                    />
-                </div>
-            </EdgeLabelRenderer>
-        </>
-    );
-};
-
-const nodeTypes = {
-    storyNode: StoryNode,
-};
-
-const edgeTypes = {
-    storyEdge: StoryEdge,
-};
-
-const StoryEditor = () => {
-    const { id: storyId } = useParams<{ id: string }>();
-
-    const [nodes, setNodes, onNodesChange] = useNodesState<TStoryNode>([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
-    const [selectedNode, setSelectedNode] = useState<TStoryNode | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        if (!storyId) return;
-
-        const fetchStoryData = async () => {
-            try {
-                setLoading(true);
-                // Mocking API call results
-                const mockPages = [
-                    { _id: '1', content: 'The start of the adventure.', isEnding: false, choices: [{ text: 'Go left', targetPageId: '2' }] },
-                    { _id: '2', content: 'You found a fork in the road.', isEnding: false, choices: [{ text: 'Go deeper', targetPageId: '3' }] },
-                    { _id: '3', content: 'The end of the story.', isEnding: true, choices: [] },
-                ];
-
-                const pages = mockPages as any[];
-
-                const mappedNodes: TStoryNode[] = pages.map((page, index) => ({
-                    id: page._id,
-                    type: 'storyNode',
-                    position: { x: (index % 3) * 300 + 50, y: Math.floor(index / 3) * 200 + 50 },
-                    data: {
-                        title: `Page ${index + 1}`,
-                        content: page.content,
-                        isEnding: page.isEnding,
-                        choices: page.choices || [],
-                    },
-                }));
-
-                const mappedEdges: Edge[] = [];
-                pages.forEach((page) => {
-                    page.choices.forEach((choice: { targetPageId: string; text: string; }, choiceIndex: number) => {
-                        mappedEdges.push({
-                            id: `e${page._id}-${choice.targetPageId}-${choiceIndex}`,
-                            source: page._id,
-                            target: choice.targetPageId,
-                            type: 'storyEdge', // Use custom edge type
-                            label: choice.text,
-                        });
-                    });
-                });
-
-                setNodes(mappedNodes);
-                setEdges(mappedEdges);
-            } catch (error) {
-                console.error('Failed to fetch story data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchStoryData();
-    }, [storyId, setNodes, setEdges]);
-
-    const onConnect = useCallback(
-        (params: Connection) => {
-            // 1. Create the Visual Edge with custom type
-            const newEdge: Edge = {
-                ...params,
-                id: `e${params.source}-${params.target}-${Date.now()}`,
-                type: 'storyEdge', // Use custom edge type
-                label: 'Next',
-                animated: true,
-            };
-
-            setEdges((eds) => addEdge(newEdge, eds));
-
-            // 2. Update the Source Node's Data
-            setNodes((nds) => nds.map((node) => {
-                if (node.id === params.source && params.target) {
-                    const newChoice = { text: 'Next', targetPageId: params.target };
-                    return {
-                        ...node,
-                        data: {
-                            ...node.data,
-                            choices: [...(node.data.choices || []), newChoice]
-                        }
-                    };
-                }
-                return node;
-            }));
-
-            console.log(`Connected ${params.source} to ${params.target}`);
-        },
-        [setEdges, setNodes],
-    );
-
-    const onNodeClick = useCallback((_event: React.MouseEvent, node: TStoryNode) => {
-        setSelectedNode(node);
-    }, []);
-
-    const addPage = async () => {
-        if (!storyId) return;
-        try {
-            const newPageData = {
-                content: 'Write your story here...',
-                isEnding: false,
-                choices: []
-            };
-
-            const newPage = { _id: Date.now().toString(), content: newPageData.content, isEnding: newPageData.isEnding };
-
-            const newNode: TStoryNode = {
-                id: newPage._id,
-                type: 'storyNode',
-                position: { x: Math.random() * 400 + 50, y: Math.random() * 400 + 50 },
-                data: {
-                    title: 'New Page',
-                    content: newPage.content,
-                    isEnding: newPage.isEnding,
-                    choices: [],
-                },
-            };
-            setNodes((nds) => [...nds, newNode]);
-        } catch (error) {
-            console.error('Failed to create page:', error);
-        }
-    };
-
-    const handleUpdatePage = async (title: string, content: string) => {
-        if (!selectedNode) return;
-
-        setNodes((nds) =>
-            nds.map((node) => {
-                if (node.id === selectedNode.id) {
-                    return {
-                        ...node,
-                        data: {
-                            ...node.data,
-                            title,
-                            content,
-                        },
-                    } as TStoryNode;
-                }
-                return node;
-            })
-        );
-
-        setSelectedNode((prev) =>
-            prev ? { ...prev, data: { ...prev.data, title, content } } : null
-        );
-
-        try {
-            console.log(`Updated page ${selectedNode.id} content in UI.`);
-        } catch (error) {
-            console.error('Failed to update page:', error);
-        }
-    };
-
-    if (loading) {
-        return <div className="h-screen flex items-center justify-center bg-gray-900 text-white">Loading story...</div>;
-    }
-
-    return (
-        <div className="h-[calc(90dvh-64px)] w-full bg-gray-900 flex">
-            {/* Sidebar / Toolbar */}
-            <div className="w-64 bg-gray-800 border-r border-gray-700 p-4 flex flex-col gap-4">
-                <h2 className="text-xl font-bold text-white">Story Editor</h2>
-                <button
-                    onClick={addPage}
-                    className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium transition-colors"
-                >
-                    + Add Page
-                </button>
-
-                {selectedNode ? (
-                    <div className="flex flex-col gap-3 mt-4 border-t border-gray-700 pt-4">
-                        <h3 className="text-lg font-semibold text-white">Edit Page</h3>
-                        <div>
-                            <label className="block text-xs text-gray-400 mb-1">Title (Local only)</label>
-                            <input
-                                type="text"
-                                value={selectedNode.data.title}
-                                onChange={(e) => handleUpdatePage(e.target.value, selectedNode.data.content)}
-                                className="w-full bg-gray-700 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-gray-400 mb-1">Content</label>
-                            <textarea
-                                value={selectedNode.data.content}
-                                onChange={(e) => handleUpdatePage(selectedNode.data.title, e.target.value)}
-                                className="w-full bg-gray-700 text-white px-3 py-2 rounded text-sm h-32 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-                            />
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-gray-400 text-sm mt-4">
-                        <p>Drag to move pages.</p>
-                        <p>Connect handles to link choices.</p>
-                        <p className="mt-2 text-indigo-400">Click a page to edit.</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Canvas */}
-            <div className="flex-1 h-full">
-                <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
-                    onNodeClick={onNodeClick}
-                    nodeTypes={nodeTypes}
-                    edgeTypes={edgeTypes}
-                    fitView
-                    className="bg-gray-900"
-                >
-                    <Controls className="bg-white text-black" />
-                    <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#374151" />
-                </ReactFlow>
-            </div>
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <div className="border-b border-border/50 px-6 py-4 bg-card/50 backdrop-blur-sm">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate("/my-stories")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            
+            <div className="h-6 w-px bg-border" />
+            
+            <Input 
+              value={storyTitle}
+              onChange={(e) => setStoryTitle(e.target.value)}
+              className="bg-transparent border-none text-lg font-semibold focus-visible:ring-0 px-2"
+            />
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate(`/editor/${id}/flow`)}
+            >
+              <GitBranch className="w-4 h-4 mr-2" />
+              Flow View
+            </Button>
+            <Button size="sm" className="gap-2">
+              <Save className="w-4 h-4" />
+              Save
+            </Button>
+          </div>
         </div>
-    );
-};
+      </div>
 
-export default StoryEditor;
+      {/* Main Editor */}
+      <div className="flex-1 flex">
+        {/* Page List Sidebar */}
+        <div className="w-64 border-r border-border/50 bg-card/30">
+          <div className="p-4 border-b border-border/50">
+            <Button 
+              size="sm" 
+              className="w-full gap-2"
+              onClick={addPage}
+            >
+              <Plus className="w-4 h-4" />
+              Add Page
+            </Button>
+          </div>
+          
+          <ScrollArea className="h-[calc(100vh-180px)]">
+            <div className="p-2">
+              {pages.map(page => (
+                <div
+                  key={page.id}
+                  className={`p-3 rounded-lg mb-2 cursor-pointer transition-all ${
+                    selectedPageId === page.id
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-muted'
+                  }`}
+                  onClick={() => setSelectedPageId(page.id)}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-semibold">{page.title}</span>
+                    {page.isEnding && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-secondary text-secondary-foreground">
+                        END
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs opacity-70">
+                    {page.choices.length} choice{page.choices.length !== 1 ? 's' : ''}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* Page Editor */}
+        <div className="flex-1">
+          <ScrollArea className="h-[calc(100vh-80px)]">
+            <div className="p-8 max-w-4xl mx-auto">
+              {selectedPage ? (
+                <div className="space-y-6">
+                  {/* Page Title */}
+                  <div className="space-y-2">
+                    <Label htmlFor="page-title">Page Title</Label>
+                    <Input
+                      id="page-title"
+                      value={selectedPage.title}
+                      onChange={(e) => updatePage({ title: e.target.value })}
+                      className="bg-input border-border/50"
+                      placeholder="e.g., Opening Scene"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Internal name for organization (not shown to readers)
+                    </p>
+                  </div>
+
+                  {/* Page Text */}
+                  <div className="space-y-2">
+                    <Label htmlFor="page-text">Page Content</Label>
+                    <Textarea
+                      id="page-text"
+                      value={selectedPage.text}
+                      onChange={(e) => updatePage({ text: e.target.value })}
+                      className="bg-input border-border/50 min-h-[200px]"
+                      placeholder="Write your story content here..."
+                    />
+                  </div>
+
+                  {/* Illustration Upload */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Page Illustration</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="border-2 border-dashed border-border/50 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                        <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Click to upload or drag and drop
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          PNG, JPG up to 5MB
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Ending Toggle */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Ending Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label htmlFor="is-ending">Mark as Ending</Label>
+                          <p className="text-xs text-muted-foreground">
+                            This page concludes the story
+                          </p>
+                        </div>
+                        <Switch
+                          id="is-ending"
+                          checked={selectedPage.isEnding}
+                          onCheckedChange={(checked: boolean) => updatePage({ isEnding: checked })}
+                        />
+                      </div>
+
+                      {selectedPage.isEnding && (
+                        <div className="space-y-2">
+                          <Label htmlFor="ending-label">Ending Label</Label>
+                          <Input
+                            id="ending-label"
+                            value={selectedPage.endingLabel}
+                            onChange={(e) => updatePage({ endingLabel: e.target.value })}
+                            className="bg-input border-border/50"
+                            placeholder="e.g., Heroic Victory"
+                          />
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Choices */}
+                  {!selectedPage.isEnding && (
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-base">Choices</CardTitle>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={addChoice}
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Choice
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {selectedPage.choices.map((choice, index) => (
+                          <div key={choice.id} className="p-4 border border-border/50 rounded-lg space-y-3">
+                            <div className="flex items-start justify-between">
+                              <span className="text-sm text-muted-foreground">Choice {index + 1}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteChoice(choice.id)}
+                              >
+                                <Trash2 className="w-4 h-4 text-destructive" />
+                              </Button>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>Choice Text</Label>
+                              <Input
+                                value={choice.text}
+                                onChange={(e) => updateChoice(choice.id, { text: e.target.value })}
+                                className="bg-input border-border/50"
+                                placeholder="What the reader sees..."
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>Target Page</Label>
+                              <Select
+                                value={choice.targetPage}
+                                onValueChange={(value: string) => updateChoice(choice.id, { targetPage: value })}
+                              >
+                                <SelectTrigger className="bg-input border-border/50">
+                                  <SelectValue placeholder="Select target page" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {pages.map(p => (
+                                    <SelectItem key={p.id} value={p.id}>
+                                      {p.title} {p.isEnding && '(Ending)'}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        ))}
+
+                        {selectedPage.choices.length === 0 && (
+                          <div className="text-center py-8 text-muted-foreground text-sm">
+                            No choices yet. Add at least one choice or mark this as an ending page.
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  Select a page to edit
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+      </div>
+    </div>
+  );
+}

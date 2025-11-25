@@ -1,112 +1,106 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { BookOpen } from "lucide-react";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 
-const Register = () => {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const { register } = useAuth();
-    const navigate = useNavigate();
+export function Register() {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Mock registration - navigate to dashboard
+    navigate("/dashboard");
+  };
 
-        if (password !== confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            await register(username, email, password);
-            navigate('/');
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Registration failed');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="max-w-md mx-auto mt-16">
-            <div className="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
-                <h2 className="text-3xl font-bold mb-6 text-center text-indigo-400">Register</h2>
-
-                {error && (
-                    <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-200">
-                        {error}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2 text-gray-300">Username</label>
-                        <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium mb-2 text-gray-300">Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium mb-2 text-gray-300">Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium mb-2 text-gray-300">Confirm Password</label>
-                        <input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
-                            required
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 rounded-lg font-semibold transition"
-                    >
-                        {loading ? 'Registering...' : 'Register'}
-                    </button>
-                </form>
-
-                <p className="mt-6 text-center text-gray-400">
-                    Already have an account?{' '}
-                    <Link to="/login" className="text-indigo-400 hover:text-indigo-300">
-                        Login here
-                    </Link>
-                </p>
+  return (
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 via-background to-primary/10" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-secondary/20 via-transparent to-transparent" />
+      
+      <Card className="w-full max-w-md mx-4 relative z-10 border-border/50">
+        <CardHeader className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center">
+              <BookOpen className="w-8 h-8 text-white" />
             </div>
-        </div>
-    );
-};
-
-export default Register;
+          </div>
+          <div>
+            <CardTitle className="text-2xl">Create Account</CardTitle>
+            <CardDescription className="text-muted-foreground mt-2">
+              Join the adventure and start creating stories
+            </CardDescription>
+          </div>
+        </CardHeader>
+        
+        <form onSubmit={handleRegister}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="herowriter"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="bg-input border-border/50"
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                This will be your public display name
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-input border-border/50"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-input border-border/50"
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Must be at least 8 characters
+              </p>
+            </div>
+          </CardContent>
+          
+          <CardFooter className="flex flex-col gap-4">
+            <Button type="submit" className="w-full">
+              Create Account
+            </Button>
+            
+            <div className="text-sm text-center text-muted-foreground">
+              Already have an account?{" "}
+              <Link to="/login" className="text-primary hover:underline">
+                Sign in
+              </Link>
+            </div>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  );
+}

@@ -1,1 +1,71 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --color-red-500: oklch(.637 .237 25.331);
+  --color-red-600: oklch(.577 .245 27.325);
+  --color-yellow-500: oklch(.795 .184 86.047);
+  --color-yellow-600: oklch(.681 .162 75.834);
+  --color-green-500: oklch(.723 .219 149.579);
+  --color-blue-500: oklch(.623 .214 259.815);
+  --color-blue-600: oklch(.546 .245 262.881);
+  --color-indigo-500: oklch(.585 .233 277.117);
+  --color-indigo-600: oklch(.511 .262 276.966);
+  --color-purple-500: oklch(.627 .265 303.9);
+  --color-purple-600: oklch(.558 .288 302.321);
+  --color-pink-500: oklch(.656 .241 354.308);
+  --color-gray-100: oklch(.967 .003 264.542);
+  --color-gray-500: oklch(.551 .027 264.364);
+  --color-gray-600: oklch(.446 .03 256.802);
+  --color-black: #000;
+  --color-white: #fff;
+  --radius-2xl: 1rem;
+  --blur-sm: 8px;
+  --aspect-video: 16 / 9;
+  --default-transition-duration: .15s;
+  --default-transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+}
+
+:root {
+  --background: 224 71% 4%;
+  --foreground: 213 31% 91%;
+  
+  --card: 224 71% 4%;
+  --card-foreground: 213 31% 91%;
+  
+  --popover: 224 71% 4%;
+  --popover-foreground: 215 20.2% 65.1%;
+  
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 1.2%;
+  
+  --secondary: 222.2 47.4% 11.2%;
+  --secondary-foreground: 210 40% 98%;
+  
+  --muted: 223 47% 11%;
+  --muted-foreground: 215.4 16.3% 56.9%;
+  
+  --accent: 216 34% 17%;
+  --accent-foreground: 210 40% 98%;
+  
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 210 40% 98%;
+  
+  --border: 216 34% 17%;
+  --input: 216 34% 17%;
+  --ring: 216 34% 17%;
+  
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+    outline-color: hsl(var(--ring) / 0.5);
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
