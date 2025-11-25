@@ -1,30 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../api/client';
-import { pageService } from '../api/services';
+import { gameService, pageService } from '../api/services';
+import type { GameSession, Page } from '../api/services';
 import DiceRoller from '../components/DiceRoller';
-
-interface GameSession {
-    _id: string;
-    userId: string;
-    storyId: string;
-    currentPageId: string;
-    history: string[];
-    status: string;
-}
-
-interface Page {
-    _id: string;
-    storyId: string;
-    content: string;
-    image?: string;
-    choices: {
-        text: string;
-        targetPageId: string;
-    }[];
-    isEnding: boolean;
-    endingType?: string;
-}
 
 interface PlayerClass {
     name: string;
@@ -53,25 +31,25 @@ const GamePlayer = () => {
     const [diceConfig, setDiceConfig] = useState<{ difficulty: number; type: 'combat' | 'flee' } | null>(null);
 
     useEffect(() => {
-        if (sessionId) {
-            loadSession();
-        }
-    }, [sessionId]);
-
     const loadSession = async () => {
         try {
             setLoading(true);
-            const sessionResponse = await api.get<GameSession>(`/game/session/${sessionId}`);
-            setSession(sessionResponse.data);
+                const sessionData = await gameService.getSession(sessionId!);
+                setSession(sessionData);
 
-            const pageResponse = await pageService.getPage(sessionResponse.data.currentPageId);
-            setCurrentPage(pageResponse);
+                const pageData = await pageService.getPage(sessionData.currentPageId);
+                setCurrentPage(pageData);
         } catch (error) {
             console.error('Failed to load session:', error);
         } finally {
             setLoading(false);
         }
     };
+
+        if (sessionId) {
+            loadSession();
+        }
+    }, [sessionId]);
 
     const handleClassSelection = (className: string) => {
         setPlayerClass(CLASSES[className]);
@@ -81,7 +59,7 @@ const GamePlayer = () => {
         if (!session || !currentPage) return;
 
         // Check if this is a dice roll choice (but not an outcome choice like "≥18")
-        const isOutcomeChoice = choiceText.match(/^[\[<≥\d]/); // Starts with [, <, ≥, or digit
+        const isOutcomeChoice = choiceText.match(/^[[<≥\d]/); // Starts with [, <, ≥, or digit
         const isDiceRoll = (choiceText.includes('1d20') || choiceText.includes('[COMBAT') || choiceText.includes('[FUITE')) && !isOutcomeChoice;
 
         if (isDiceRoll) {
@@ -174,15 +152,12 @@ const GamePlayer = () => {
                 setStatBuffs(prev => ({ ...prev, combat: prev.combat + 2 }));
             }
 
-            const response = await api.post<GameSession>('/game/choice', {
-                sessionId: session._id,
-                choiceIndex
-            });
+            const response = await gameService.makeChoice(session._id, choiceIndex);
 
-            setSession(response.data);
+            setSession(response);
 
-            const pageResponse = await pageService.getPage(response.data.currentPageId);
-            setCurrentPage(pageResponse);
+            const pageData = await pageService.getPage(response.currentPageId);
+            setCurrentPage(pageData);
         } catch (error) {
             console.error('Failed to make choice:', error);
         }
@@ -192,17 +167,15 @@ const GamePlayer = () => {
         if (!session) return;
 
         try {
-            const response = await api.post<GameSession>('/game/start', {
-                storyId: session.storyId
-            });
-            navigate(`/play/${response.data._id}`);
+            const response = await gameService.startSession(session.storyId);
+            navigate(`/play/${response._id}`);
         } catch (error) {
             console.error('Failed to restart:', error);
         }
     };
 
     const handleBackToLibrary = () => {
-        navigate('/library');
+        navigate('/stories');
     };
 
     if (loading) {
@@ -319,7 +292,7 @@ const GamePlayer = () => {
                             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
                                 {currentPage.choices.map((choice, index) => {
                                     // Hide outcome choices (they're handled by dice rolls)
-                                    const isOutcomeChoice = choice.text.match(/^\[?[<≥\d]/); // Starts with [, <, ≥, or digit
+                                    const isOutcomeChoice = choice.text.match(/^[[<≥\d]/); // Starts with [, <, ≥, or digit
                                     if (isOutcomeChoice) {
                                         return null; // Don't display outcome choices as buttons
                                     }
@@ -341,7 +314,7 @@ const GamePlayer = () => {
                                     }
 
                                     // Clean up choice text
-                                    let displayText = choice.text
+                                    const displayText = choice.text
                                         .replace('[GUERRIER]', '')
                                         .replace('[MAGE]', '')
                                         .replace('[ASSASSIN]', '')

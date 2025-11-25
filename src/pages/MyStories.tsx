@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navigation } from "../components/Navigation";
 import { Button } from "../components/ui/button";
@@ -9,7 +9,6 @@ import {
   Edit, 
   Trash2, 
   Eye, 
-  Star, 
   GitBranch,
   MoreVertical 
 } from "lucide-react";
@@ -29,77 +28,81 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
-
-interface Story {
-  id: string;
-  title: string;
-  status: "draft" | "published";
-  plays: number;
-  rating: number;
-  totalEndings: number;
-  endingsReached: number;
-  lastEdited: string;
-}
-
-const mockStories: Story[] = [
-  {
-    id: "1",
-    title: "The Forgotten Realm",
-    status: "published",
-    plays: 12453,
-    rating: 4.8,
-    totalEndings: 8,
-    endingsReached: 6,
-    lastEdited: "2 days ago",
-  },
-  {
-    id: "2",
-    title: "Shadows of Tomorrow",
-    status: "published",
-    plays: 5432,
-    rating: 4.5,
-    totalEndings: 5,
-    endingsReached: 4,
-    lastEdited: "1 week ago",
-  },
-  {
-    id: "3",
-    title: "Untitled Story",
-    status: "draft",
-    plays: 0,
-    rating: 0,
-    totalEndings: 3,
-    endingsReached: 0,
-    lastEdited: "3 hours ago",
-  },
-];
+import { storyService } from "../api/services";
+import type { Story } from "../api/services";
 
 export function MyStories() {
   const navigate = useNavigate();
-  const [stories, setStories] = useState(mockStories);
+  const [stories, setStories] = useState<Story[]>([]);
+  const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [storyToDelete, setStoryToDelete] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadStories();
+  }, []);
+
+  const loadStories = async () => {
+    try {
+      setLoading(true);
+      const data = await storyService.getMyStories();
+      setStories(data);
+    } catch (error) {
+      console.error("Failed to load stories:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDelete = (id: string) => {
     setStoryToDelete(id);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (storyToDelete) {
-      setStories(stories.filter(s => s.id !== storyToDelete));
+      try {
+        await storyService.deleteStory(storyToDelete);
+        setStories(stories.filter(s => s._id !== storyToDelete));
+      } catch (error) {
+        console.error("Failed to delete story:", error);
+      } finally {
       setDeleteDialogOpen(false);
       setStoryToDelete(null);
     }
+    }
   };
 
-  const togglePublish = (id: string) => {
-    setStories(stories.map(story => 
-      story.id === id 
-        ? { ...story, status: story.status === "published" ? "draft" : "published" }
-        : story
-    ));
+  const togglePublish = async (story: Story) => {
+    try {
+      const newStatus = story.status === "published" ? "draft" : "published";
+      const updatedStory = await storyService.updateStory(story._id, { status: newStatus });
+      setStories(stories.map(s => s._id === story._id ? updatedStory : s));
+    } catch (error) {
+      console.error("Failed to update story status:", error);
+    }
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const getTotalPlays = () => stories.reduce((sum, s) => sum + (s.stats?.views || 0), 0);
+  
+  // Placeholder for ratings until backend supports it
+  const getAvgRating = () => "N/A";
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-muted-foreground">Loading stories...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -140,7 +143,7 @@ export function MyStories() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-semibold">
-                {stories.reduce((sum, s) => sum + s.plays, 0).toLocaleString()}
+                {getTotalPlays().toLocaleString()}
               </div>
             </CardContent>
           </Card>
@@ -151,7 +154,7 @@ export function MyStories() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-semibold">
-                {(stories.reduce((sum, s) => sum + s.rating, 0) / stories.filter(s => s.rating > 0).length).toFixed(1)}
+                {getAvgRating()}
               </div>
             </CardContent>
           </Card>
@@ -160,7 +163,7 @@ export function MyStories() {
         {/* Stories List */}
         <div className="space-y-4">
           {stories.map(story => (
-            <Card key={story.id} className="hover:border-primary/50 transition-all">
+            <Card key={story._id} className="hover:border-primary/50 transition-all">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -171,7 +174,7 @@ export function MyStories() {
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Last edited {story.lastEdited}
+                      Last edited {formatDate(story.updatedAt)}
                     </p>
                   </div>
                   
@@ -182,19 +185,19 @@ export function MyStories() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate(`/editor/${story.id}`)}>
+                      <DropdownMenuItem onClick={() => navigate(`/editor/${story._id}`)}>
                         <Edit className="w-4 h-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/editor/${story.id}/flow`)}>
+                      <DropdownMenuItem onClick={() => navigate(`/editor/${story._id}/flow`)}>
                         <GitBranch className="w-4 h-4 mr-2" />
                         View Flow
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => togglePublish(story.id)}>
+                      <DropdownMenuItem onClick={() => togglePublish(story)}>
                         {story.status === "published" ? "Unpublish" : "Publish"}
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        onClick={() => handleDelete(story.id)}
+                        onClick={() => handleDelete(story._id)}
                         className="text-destructive"
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
@@ -209,23 +212,24 @@ export function MyStories() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="flex items-center gap-2 text-sm">
                     <Eye className="w-4 h-4 text-muted-foreground" />
-                    <span>{story.plays.toLocaleString()} plays</span>
+                    <span>{(story.stats?.views || 0).toLocaleString()} plays</span>
                   </div>
                   
-                  {story.rating > 0 && (
+                  {/* Rating placeholder */}
+                  {/* 
                     <div className="flex items-center gap-2 text-sm">
                       <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      <span>{story.rating.toFixed(1)} rating</span>
+                    <span>4.5 rating</span>
                     </div>
-                  )}
+                  */}
                   
                   <div className="flex items-center gap-2 text-sm">
                     <GitBranch className="w-4 h-4 text-muted-foreground" />
-                    <span>{story.totalEndings} endings</span>
+                    <span>{Object.keys(story.stats?.endings || {}).length} endings</span>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{story.endingsReached}/{story.totalEndings} reached</span>
+                    <span>{story.stats?.completions || 0} completions</span>
                   </div>
                 </div>
               </CardContent>
@@ -234,7 +238,7 @@ export function MyStories() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => navigate(`/editor/${story.id}`)}
+                  onClick={() => navigate(`/editor/${story._id}`)}
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
@@ -242,7 +246,7 @@ export function MyStories() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => navigate(`/editor/${story.id}/flow`)}
+                  onClick={() => navigate(`/editor/${story._id}/flow`)}
                 >
                   <GitBranch className="w-4 h-4 mr-2" />
                   View Flow
@@ -251,7 +255,7 @@ export function MyStories() {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => navigate(`/story/${story.id}`)}
+                    onClick={() => navigate(`/story/${story._id}`)}
                   >
                     <Eye className="w-4 h-4 mr-2" />
                     Preview

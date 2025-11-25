@@ -7,6 +7,7 @@ import { StoryDetails } from "./pages/StoryDetails";
 import { ReadingMode } from "./pages/ReadingMode";
 import { EndOfStory } from "./pages/EndOfStory";
 import { MyStories } from "./pages/MyStories";
+import { NewStory } from "./pages/NewStory";
 import { StoryEditor } from "./pages/StoryEditor";
 import { StoryFlowView } from "./pages/StoryFlowView";
 import { Admin } from "./pages/Admin";
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/read/:id" element={<ReadingMode />} />
         <Route path="/story/:id/ending" element={<EndOfStory />} />
         <Route path="/my-stories" element={<MyStories />} />
+        <Route path="/editor/new" element={<NewStory />} />
         <Route path="/editor/:id" element={<StoryEditor />} />
         <Route path="/editor/:id/flow" element={<StoryFlowView />} />
         <Route path="/admin" element={<Admin />} />
