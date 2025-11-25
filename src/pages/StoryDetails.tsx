@@ -4,10 +4,29 @@ import { Navigation } from "../components/Navigation";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Star, Eye, User, Trophy, PlayCircle } from "lucide-react";
+import { Star, Eye, User, Trophy, PlayCircle, Flag } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { storyService, gameService, favoriteService } from "../api/services";
-import type { Story } from "../api/services";
+import {
+  storyService,
+  gameService,
+  favoriteService,
+  ratingService,
+  reportService,
+} from "../api/services";
+import type { Story, Rating, RatingsResponse, ReportType } from "../api/services";
+import { Textarea } from "../components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { useAuth } from "../context/AuthContext";
 
 export function StoryDetails() {
   const navigate = useNavigate();
@@ -16,12 +35,26 @@ export function StoryDetails() {
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const { user } = useAuth();
+
+  const [ratingsData, setRatingsData] = useState<RatingsResponse | null>(null);
+  const [myRating, setMyRating] = useState<Rating | null>(null);
+  const [userScore, setUserScore] = useState<number>(0);
+  const [userComment, setUserComment] = useState("");
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
+
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportType, setReportType] = useState<ReportType>("inappropriate_content");
+  const [reportDescription, setReportDescription] = useState("");
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadStory(id);
       checkFavoriteStatus(id);
+      loadRatings(id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadStory = async (storyId: string) => {
@@ -33,6 +66,29 @@ export function StoryDetails() {
       console.error("Failed to load story:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRatings = async (storyId: string) => {
+    try {
+      const data = await ratingService.getStoryRatings(storyId);
+      setRatingsData(data);
+    } catch (error) {
+      console.error("Failed to load ratings:", error);
+    }
+
+    // Rating de l'utilisateur courant (si connecté)
+    if (user) {
+      try {
+        const mine = await ratingService.getMyRating(storyId);
+        setMyRating(mine);
+        if (mine) {
+          setUserScore(mine.score);
+          setUserComment(mine.comment || "");
+        }
+      } catch (error) {
+        console.error("Failed to load user rating:", error);
+      }
     }
   };
 
@@ -63,9 +119,10 @@ export function StoryDetails() {
     try {
       const session = await gameService.startSession(story._id);
       navigate(`/play/${session._id}`);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to start game session:", error);
-      const errorMessage = error.response?.data?.message || "Failed to start game session";
+      const err = error as { response?: { data?: { message?: string } } };
+      const errorMessage = err.response?.data?.message || "Failed to start game session";
 
       if (errorMessage.includes("no start page")) {
         alert("This story is not ready to play yet. The author needs to set up the story pages first.");
@@ -74,6 +131,65 @@ export function StoryDetails() {
       } else {
         alert(`Error: ${errorMessage}`);
       }
+    }
+  };
+
+  const handleSubmitRating = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !user) {
+      alert("You must be logged in to rate this story.");
+      return;
+    }
+    if (userScore < 1 || userScore > 5) {
+      alert("Please select a rating between 1 and 5.");
+      return;
+    }
+
+    try {
+      setRatingSubmitting(true);
+      await ratingService.rateStory(id, userScore, userComment || undefined);
+      await loadRatings(id);
+    } catch (error: unknown) {
+      console.error("Failed to submit rating:", error);
+      alert("Failed to submit rating. Please try again.");
+    } finally {
+      setRatingSubmitting(false);
+    }
+  };
+
+  const handleDeleteRating = async () => {
+    if (!id) return;
+    try {
+      setRatingSubmitting(true);
+      await ratingService.deleteRating(id);
+      setMyRating(null);
+      setUserScore(0);
+      setUserComment("");
+      await loadRatings(id);
+    } catch (error) {
+      console.error("Failed to delete rating:", error);
+      alert("Failed to delete rating. Please try again.");
+    } finally {
+      setRatingSubmitting(false);
+    }
+  };
+
+  const handleSubmitReport = async () => {
+    if (!id) return;
+    try {
+      setReportSubmitting(true);
+      await reportService.reportStory(id, reportType, reportDescription || undefined);
+      setReportDialogOpen(false);
+      setReportDescription("");
+      setReportType("inappropriate_content");
+      alert("Report submitted. Thank you for your feedback.");
+    } catch (error) {
+      console.error("Failed to submit report:", error);
+      const err = error as { response?: { data?: { message?: string } } };
+      const msg = err.response?.data?.message || "Failed to submit report.";
+      alert(msg);
+    } finally {
+      setReportSubmitting(false);
     }
   };
 
@@ -159,6 +275,118 @@ export function StoryDetails() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Ratings & Comments */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Ratings & Comments</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Summary */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                    <span className="text-lg font-semibold">
+                      {ratingsData?.stats.averageScore
+                        ? ratingsData.stats.averageScore.toFixed(1)
+                        : "No ratings yet"}
+                    </span>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {ratingsData?.stats.totalRatings || 0} vote(s)
+                  </div>
+                </div>
+
+                {/* User rating form */}
+                <div className="border-t border-border/50 pt-4">
+                  {user ? (
+                    <form onSubmit={handleSubmitRating} className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        {[1, 2, 3, 4, 5].map((value) => (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setUserScore(value)}
+                            className="focus:outline-none"
+                          >
+                            <Star
+                              className={`w-6 h-6 ${
+                                value <= userScore
+                                  ? "text-yellow-500 fill-yellow-500"
+                                  : "text-muted-foreground"
+                              }`}
+                            />
+                          </button>
+                        ))}
+                        <span className="text-sm text-muted-foreground ml-2">
+                          {userScore > 0 ? `${userScore} / 5` : "Select a rating"}
+                        </span>
+                      </div>
+                      <Textarea
+                        placeholder="Leave a comment (optional)..."
+                        value={userComment}
+                        onChange={(e) => setUserComment(e.target.value)}
+                        className="min-h-[80px]"
+                      />
+                      <div className="flex gap-2">
+                        <Button type="submit" size="sm" disabled={ratingSubmitting}>
+                          {ratingSubmitting ? "Submitting..." : "Submit Rating"}
+                        </Button>
+                        {myRating && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={handleDeleteRating}
+                            disabled={ratingSubmitting}
+                          >
+                            Remove Rating
+                          </Button>
+                        )}
+                      </div>
+                    </form>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Log in to rate and comment on this story.
+                    </p>
+                  )}
+                </div>
+
+                {/* Recent comments */}
+                {ratingsData && ratingsData.ratings.length > 0 && (
+                  <div className="border-t border-border/50 pt-4 space-y-3">
+                    <div className="text-sm font-medium">Recent Comments</div>
+                    {ratingsData.ratings.slice(0, 3).map((rating) => (
+                      <div
+                        key={rating._id}
+                        className="p-3 rounded-lg bg-muted/40 border border-border/50 text-sm"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((value) => (
+                              <Star
+                                key={value}
+                                className={`w-3 h-3 ${
+                                  value <= rating.score
+                                    ? "text-yellow-500 fill-yellow-500"
+                                    : "text-muted-foreground"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(rating.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {rating.comment && (
+                          <p className="text-sm text-muted-foreground">{rating.comment}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
@@ -170,6 +398,17 @@ export function StoryDetails() {
             >
               <PlayCircle className="w-5 h-5" />
               Start Adventure
+            </Button>
+
+            {/* Report story */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+              onClick={() => setReportDialogOpen(true)}
+            >
+              <Flag className="w-4 h-4" />
+              Report Story
             </Button>
 
             <Card>
@@ -217,6 +456,57 @@ export function StoryDetails() {
           </div>
         </div>
       </main>
+
+      {/* Report dialog */}
+      <AlertDialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Report this story</AlertDialogTitle>
+            <AlertDialogDescription>
+              Help us moderate the platform by explaining what is wrong with this story.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Reason</label>
+              <Select
+                value={reportType}
+                onValueChange={(value) => setReportType(value as ReportType)}
+              >
+                <SelectTrigger className="bg-input border-border/50">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="inappropriate_content">Inappropriate content</SelectItem>
+                  <SelectItem value="spam">Spam</SelectItem>
+                  <SelectItem value="copyright">Copyright issue</SelectItem>
+                  <SelectItem value="harassment">Harassment</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Details (optional)</label>
+              <Textarea
+                placeholder="Describe the problem..."
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                className="min-h-[80px]"
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={reportSubmitting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleSubmitReport}
+              className="bg-destructive text-destructive-foreground"
+              disabled={reportSubmitting}
+            >
+              {reportSubmitting ? "Submitting..." : "Submit Report"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

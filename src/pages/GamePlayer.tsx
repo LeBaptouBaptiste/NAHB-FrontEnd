@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { gameService, pageService } from '../api/services';
-import type { GameSession, Page } from '../api/services';
+import type { GameSession, Page, PathStats } from '../api/services';
 import DiceRoller from '../components/DiceRoller';
 
 interface PlayerClass {
@@ -29,6 +29,8 @@ const GamePlayer = () => {
     const [showDiceRoll, setShowDiceRoll] = useState(false);
     const [pendingChoice, setPendingChoice] = useState<number | null>(null);
     const [diceConfig, setDiceConfig] = useState<{ difficulty: number; type: 'combat' | 'flee' } | null>(null);
+    const [pathStats, setPathStats] = useState<PathStats | null>(null);
+    const [pathStatsLoading, setPathStatsLoading] = useState(false);
 
     useEffect(() => {
         const loadSession = async () => {
@@ -50,6 +52,25 @@ const GamePlayer = () => {
             loadSession();
         }
     }, [sessionId]);
+
+    // Charge les statistiques de parcours lorsqu'on atteint une fin
+    useEffect(() => {
+        if (!session || !currentPage?.isEnding || pathStats || pathStatsLoading) return;
+
+        const loadPathStats = async () => {
+            try {
+                setPathStatsLoading(true);
+                const stats = await gameService.getPathStats(session._id);
+                setPathStats(stats);
+            } catch (error) {
+                console.error('Failed to load path stats:', error);
+            } finally {
+                setPathStatsLoading(false);
+            }
+        };
+
+        loadPathStats();
+    }, [session, currentPage, pathStats, pathStatsLoading]);
 
     const handleClassSelection = (className: string) => {
         setPlayerClass(CLASSES[className]);
@@ -370,6 +391,37 @@ const GamePlayer = () => {
                                 >
                                     Bibliothèque
                                 </button>
+                            </div>
+
+                            {/* Path statistics */}
+                            <div className="mt-8 text-sm text-gray-300 text-left">
+                                {pathStatsLoading && (
+                                    <p className="text-gray-400">Calcul des statistiques de votre parcours...</p>
+                                )}
+                                {pathStats && (
+                                    <div className="space-y-3">
+                                        <p>{pathStats.samePathStats.message}</p>
+                                        <p className="text-gray-400">
+                                            Nombre total de parties terminées sur cette histoire :{' '}
+                                            <span className="text-white font-semibold">
+                                                {pathStats.totalCompletedSessions}
+                                            </span>
+                                        </p>
+                                        {pathStats.currentEnding && (
+                                            <p className="text-gray-400">
+                                                Cette fin (
+                                                <span className="font-semibold">
+                                                    {pathStats.currentEnding.type}
+                                                </span>
+                                                ) a été atteinte par{' '}
+                                                <span className="text-white font-semibold">
+                                                    {pathStats.currentEnding.reachedByPercentage}%
+                                                </span>{' '}
+                                                des joueurs.
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}

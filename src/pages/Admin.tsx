@@ -69,7 +69,8 @@ interface AdminReport {
   _id: string;
   storyId: string;
   reporterId: string;
-  reason: string;
+  type: string;
+  description?: string;
   status: string;
   createdAt: string;
 }
@@ -104,12 +105,14 @@ export function Admin() {
     if (activeTab === "stories" && searchQuery) {
       loadStories();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, activeTab]);
 
   useEffect(() => {
     if (activeTab === "users" && userSearchQuery) {
       loadUsers();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userSearchQuery, activeTab]);
 
   const loadAdminData = async () => {
@@ -135,11 +138,13 @@ export function Admin() {
       setStories(storiesData.stories || []);
       setUsers(usersData.users || []);
       setReports(reportsData.reports || []);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("[Admin] Failed to load admin data:", error);
       console.error("[Admin] Error details:", {
         message: error instanceof Error ? error.message : String(error),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         response: (error as any)?.response?.data,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         status: (error as any)?.response?.status,
       });
     } finally {
@@ -390,7 +395,7 @@ export function Admin() {
                         reports.map((report) => (
                           <TableRow key={report._id}>
                             <TableCell>
-                              <Badge variant="outline">{report.reason}</Badge>
+                              <Badge variant="outline">{report.type}</Badge>
                             </TableCell>
                             <TableCell className="text-muted-foreground">{report.storyId.substring(0, 8)}...</TableCell>
                             <TableCell className="text-muted-foreground">{report.reporterId.substring(0, 8)}...</TableCell>

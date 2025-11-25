@@ -64,9 +64,18 @@ export function Navigation() {
             <LogOut className="w-4 h-4" />
             Logout
           </Button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center cursor-pointer">
-            <span className="text-sm text-white">JD</span>
-          </div>
+          {user && (
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center cursor-pointer">
+                <span className="text-sm text-white font-medium">
+                  {user.username.substring(0, 2).toUpperCase()}
+                </span>
+              </div>
+              <span className="text-sm font-medium hidden sm:inline">
+                {user.username}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </nav>

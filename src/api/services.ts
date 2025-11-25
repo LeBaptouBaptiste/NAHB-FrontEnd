@@ -109,8 +109,45 @@ export const gameService = {
     getUserSessions: async () => {
         const response = await api.get<GameSession[]>('/game/sessions');
         return response.data;
+    },
+    getPathStats: async (sessionId: string) => {
+        const response = await api.get<PathStats>(`/game/session/${sessionId}/path-stats`);
+        return response.data;
+    },
+    getStoryStats: async (storyId: string) => {
+        const response = await api.get<StoryStats>(`/game/story/${storyId}/stats`);
+        return response.data;
     }
 };
+
+export interface PathStats {
+    sessionId: string;
+    storyId: string;
+    pathLength: number;
+    samePathStats: {
+        count: number;
+        percentage: number;
+        message: string;
+    };
+    totalCompletedSessions: number;
+    endingDistribution: Record<string, { count: number; percentage: number }>;
+    currentEnding: {
+        type: string;
+        reachedByPercentage: number;
+    } | null;
+}
+
+export interface StoryStats {
+    storyId: string;
+    views: number;
+    totalSessions: number;
+    completedSessions: number;
+    abandonedSessions: number;
+    inProgressSessions: number;
+    completionRate: number;
+    averagePathLength: number;
+    endingDistribution: Record<string, number>;
+}
 
 export interface AIStoryRequest {
     userPrompt: string;
@@ -150,6 +187,85 @@ export const uploadService = {
                 'Content-Type': 'multipart/form-data',
             },
         });
+        return response.data;
+    },
+};
+
+export interface Rating {
+    _id: string;
+    storyId: string;
+    userId: string;
+    score: number;
+    comment?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface RatingsResponse {
+    ratings: Rating[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+    };
+    stats: {
+        averageScore: number;
+        totalRatings: number;
+    };
+}
+
+export const ratingService = {
+    getStoryRatings: async (storyId: string, page = 1, limit = 10) => {
+        const response = await api.get<RatingsResponse>(`/ratings/story/${storyId}`, {
+            params: { page, limit }
+        });
+        return response.data;
+    },
+    getMyRating: async (storyId: string) => {
+        const response = await api.get<Rating | null>(`/ratings/story/${storyId}/me`);
+        return response.data;
+    },
+    rateStory: async (storyId: string, score: number, comment?: string) => {
+        const response = await api.post<Rating>(`/ratings/story/${storyId}`, { score, comment });
+        return response.data;
+    },
+    deleteRating: async (storyId: string) => {
+        const response = await api.delete<{ message: string }>(`/ratings/story/${storyId}`);
+        return response.data;
+    },
+};
+
+export type ReportType =
+    | 'inappropriate_content'
+    | 'spam'
+    | 'copyright'
+    | 'harassment'
+    | 'other';
+
+export interface Report {
+    _id: string;
+    storyId: string;
+    reporterId: string;
+    type: ReportType;
+    description?: string;
+    status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
+    adminNotes?: string;
+    resolvedBy?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export const reportService = {
+    reportStory: async (storyId: string, type: ReportType, description?: string) => {
+        const response = await api.post<{ message: string; report: Report }>(
+            `/reports/story/${storyId}`,
+            { type, description }
+        );
+        return response.data;
+    },
+    getMyReports: async () => {
+        const response = await api.get<Report[]>('/reports/my-reports');
         return response.data;
     },
 };
