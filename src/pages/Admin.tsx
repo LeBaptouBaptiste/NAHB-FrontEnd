@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Navigation } from "../components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -38,53 +39,160 @@ import {
   Ban,
   Check,
   Eye,
-  Trash2,
-  Search
+  Search,
+  Loader2
 } from "lucide-react";
+import { adminService } from "../api/services";
+import type { Story } from "../api/services";
+
+interface AdminStats {
+  users: { total: number };
+  stories: { total: number; totalViews: number };
+  sessions: { total: number };
+  reports: { total: number; pending: number };
+}
+
+interface AdminStory extends Story {
+  authorId: string;
+}
+
+interface AdminUser {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  createdAt: string;
+}
+
+interface AdminReport {
+  _id: string;
+  storyId: string;
+  reporterId: string;
+  reason: string;
+  status: string;
+  createdAt: string;
+}
 
 export function Admin() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [userSearchQuery, setUserSearchQuery] = useState("");
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
-  const [actionType, setActionType] = useState<"ban" | "delete" | "approve" | null>(null);
+  const [actionType, setActionType] = useState<"ban" | "delete" | "approve" | "suspend" | "resolve" | null>(null);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [stories, setStories] = useState<AdminStory[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [reports, setReports] = useState<AdminReport[]>([]);
+  const [activeTab, setActiveTab] = useState("stories");
 
-  const stats = [
-    { label: "Total Stories", value: "1,234", icon: BookOpen, change: "+12%", color: "text-primary" },
-    { label: "Total Users", value: "5,678", icon: Users, change: "+8%", color: "text-secondary" },
-    { label: "Total Plays", value: "89.2K", icon: TrendingUp, change: "+23%", color: "text-green-500" },
-    { label: "Pending Reports", value: "12", icon: Flag, change: "-5%", color: "text-yellow-500" },
-  ];
+  useEffect(() => {
+    loadAdminData();
+  }, []);
 
-  const stories = [
-    { id: "1", title: "The Forgotten Realm", author: "Sarah Chen", status: "published", plays: 12453, rating: 4.8, reports: 0 },
-    { id: "2", title: "Cybernetic Dreams", author: "Alex Morgan", status: "published", plays: 9876, rating: 4.6, reports: 2 },
-    { id: "3", title: "Dark Secrets", author: "John Doe", status: "pending", plays: 0, rating: 0, reports: 5 },
-  ];
+  useEffect(() => {
+    if (activeTab === "stories" && searchQuery) {
+      loadStories();
+    }
+  }, [searchQuery, activeTab]);
 
-  const reports = [
-    { id: "1", type: "Inappropriate Content", story: "Dark Secrets", reporter: "User123", date: "2 hours ago", status: "pending" },
-    { id: "2", type: "Spam", story: "Cybernetic Dreams", reporter: "Reader456", date: "5 hours ago", status: "pending" },
-    { id: "3", type: "Copyright", story: "The Forgotten Realm", reporter: "Author789", date: "1 day ago", status: "resolved" },
-  ];
+  useEffect(() => {
+    if (activeTab === "users" && userSearchQuery) {
+      loadUsers();
+    }
+  }, [userSearchQuery, activeTab]);
 
-  const users = [
-    { id: "1", username: "Sarah Chen", email: "sarah@example.com", stories: 12, joined: "Jan 2024", status: "active" },
-    { id: "2", username: "Alex Morgan", email: "alex@example.com", stories: 8, joined: "Feb 2024", status: "active" },
-    { id: "3", username: "John Doe", email: "john@example.com", stories: 1, joined: "Mar 2024", status: "banned" },
-  ];
+  const loadAdminData = async () => {
+    try {
+      setLoading(true);
+      const [statsData, storiesData, usersData, reportsData] = await Promise.all([
+        adminService.getStats(),
+        adminService.getAllStories({ limit: 50 }),
+        adminService.getAllUsers({ limit: 50 }),
+        adminService.getAllReports({ limit: 50 }),
+      ]);
 
-  const handleAction = (type: "ban" | "delete" | "approve", itemId: string) => {
+      setStats(statsData);
+      setStories(storiesData.stories || []);
+      setUsers(usersData.users || []);
+      setReports(reportsData.reports || []);
+    } catch (error) {
+      console.error("Failed to load admin data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadStories = async () => {
+    try {
+      const data = await adminService.getAllStories({ search: searchQuery, limit: 50 });
+      setStories(data.stories || []);
+    } catch (error) {
+      console.error("Failed to load stories:", error);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const data = await adminService.getAllUsers({ search: userSearchQuery, limit: 50 });
+      setUsers(data.users || []);
+    } catch (error) {
+      console.error("Failed to load users:", error);
+    }
+  };
+
+  const handleAction = (type: "ban" | "delete" | "approve" | "suspend" | "resolve", itemId: string) => {
     setActionType(type);
     setSelectedItem(itemId);
     setActionDialogOpen(true);
   };
 
-  const confirmAction = () => {
-    console.log(`Action ${actionType} on item ${selectedItem}`);
-    setActionDialogOpen(false);
-    setActionType(null);
-    setSelectedItem(null);
+  const confirmAction = async () => {
+    if (!selectedItem || !actionType) return;
+
+    try {
+      if (actionType === "ban") {
+        await adminService.toggleUserBan(selectedItem, true);
+      } else if (actionType === "suspend") {
+        await adminService.toggleStorySuspension(selectedItem, true);
+      } else if (actionType === "resolve") {
+        await adminService.updateReportStatus(selectedItem, "resolved");
+      }
+      // Reload data after action
+      await loadAdminData();
+      setActionDialogOpen(false);
+      setActionType(null);
+      setSelectedItem(null);
+    } catch (error) {
+      console.error("Failed to perform action:", error);
+    }
   };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  };
+
+  const formatRelativeDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffHours < 1) return "Just now";
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    return formatDate(dateString);
+  };
+
+  const statsDisplay = stats ? [
+    { label: "Total Stories", value: stats.stories.total.toString(), icon: BookOpen, change: "", color: "text-primary" },
+    { label: "Total Users", value: stats.users.total.toString(), icon: Users, change: "", color: "text-secondary" },
+    { label: "Total Plays", value: stats.stories.totalViews.toLocaleString(), icon: TrendingUp, change: "", color: "text-green-500" },
+    { label: "Pending Reports", value: stats.reports.pending.toString(), icon: Flag, change: "", color: "text-yellow-500" },
+  ] : [];
 
   return (
     <div className="min-h-screen">
@@ -99,27 +207,35 @@ export function Admin() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat) => (
-            <Card key={stat.label}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm text-muted-foreground">
-                  {stat.label}
-                </CardTitle>
-                <stat.icon className={`w-4 h-4 ${stat.color}`} />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-semibold mb-1">{stat.value}</div>
-                <p className={`text-xs ${stat.change.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
-                  {stat.change} from last month
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {statsDisplay.map((stat) => (
+              <Card key={stat.label}>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm text-muted-foreground">
+                    {stat.label}
+                  </CardTitle>
+                  <stat.icon className={`w-4 h-4 ${stat.color}`} />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-semibold mb-1">{stat.value}</div>
+                  {stat.change && (
+                    <p className={`text-xs ${stat.change.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
+                      {stat.change} from last month
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* Tabs */}
-        <Tabs defaultValue="stories" className="space-y-6">
+        <Tabs defaultValue="stories" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-card border border-border/50">
             <TabsTrigger value="stories">Stories</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
@@ -145,69 +261,74 @@ export function Admin() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Author</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Plays</TableHead>
-                      <TableHead>Rating</TableHead>
-                      <TableHead>Reports</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {stories.map((story) => (
-                      <TableRow key={story.id}>
-                        <TableCell>{story.title}</TableCell>
-                        <TableCell>{story.author}</TableCell>
-                        <TableCell>
-                          <Badge variant={story.status === "published" ? "default" : "secondary"}>
-                            {story.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{story.plays.toLocaleString()}</TableCell>
-                        <TableCell>{story.rating > 0 ? story.rating.toFixed(1) : '-'}</TableCell>
-                        <TableCell>
-                          {story.reports > 0 ? (
-                            <Badge variant="destructive">{story.reports}</Badge>
-                          ) : (
-                            <span className="text-muted-foreground">0</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Eye className="w-4 h-4 mr-2" />
-                                View Story
-                              </DropdownMenuItem>
-                              {story.status === "pending" && (
-                                <DropdownMenuItem onClick={() => handleAction("approve", story.id)}>
-                                  <Check className="w-4 h-4 mr-2" />
-                                  Approve
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem 
-                                onClick={() => handleAction("delete", story.id)}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
+                {loading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Author ID</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Plays</TableHead>
+                        <TableHead>Completions</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {stories.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                            No stories found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        stories.map((story) => (
+                          <TableRow key={story._id}>
+                            <TableCell className="font-medium">{story.title}</TableCell>
+                            <TableCell className="text-muted-foreground">{story.authorId.substring(0, 8)}...</TableCell>
+                            <TableCell>
+                              <Badge variant={story.status === "published" ? "default" : story.status === "draft" ? "secondary" : "destructive"}>
+                                {story.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{story.stats?.views || 0}</TableCell>
+                            <TableCell>{story.stats?.completions || 0}</TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => navigate(`/story/${story._id}`)}>
+                                    <Eye className="w-4 h-4 mr-2" />
+                                    View Story
+                                  </DropdownMenuItem>
+                                  {story.status === "published" && (
+                                    <DropdownMenuItem onClick={() => handleAction("suspend", story._id)}>
+                                      <Ban className="w-4 h-4 mr-2" />
+                                      Suspend
+                                    </DropdownMenuItem>
+                                  )}
+                                  {story.status === "draft" && (
+                                    <DropdownMenuItem onClick={() => adminService.toggleStorySuspension(story._id, false).then(() => loadAdminData())}>
+                                      <Check className="w-4 h-4 mr-2" />
+                                      Unsuspend
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -219,47 +340,58 @@ export function Admin() {
                 <CardTitle>Reports Management</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Story</TableHead>
-                      <TableHead>Reporter</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {reports.map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell>
-                          <Badge variant="outline">{report.type}</Badge>
-                        </TableCell>
-                        <TableCell>{report.story}</TableCell>
-                        <TableCell>{report.reporter}</TableCell>
-                        <TableCell className="text-muted-foreground">{report.date}</TableCell>
-                        <TableCell>
-                          <Badge variant={report.status === "pending" ? "secondary" : "default"}>
-                            {report.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="outline" size="sm">
-                              Review
-                            </Button>
-                            {report.status === "pending" && (
-                              <Button size="sm">
-                                Resolve
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
+                {loading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Reason</TableHead>
+                        <TableHead>Story ID</TableHead>
+                        <TableHead>Reporter ID</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {reports.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                            No reports found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        reports.map((report) => (
+                          <TableRow key={report._id}>
+                            <TableCell>
+                              <Badge variant="outline">{report.reason}</Badge>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">{report.storyId.substring(0, 8)}...</TableCell>
+                            <TableCell className="text-muted-foreground">{report.reporterId.substring(0, 8)}...</TableCell>
+                            <TableCell className="text-muted-foreground">{formatRelativeDate(report.createdAt)}</TableCell>
+                            <TableCell>
+                              <Badge variant={report.status === "pending" ? "secondary" : "default"}>
+                                {report.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                {report.status === "pending" && (
+                                  <Button size="sm" onClick={() => handleAction("resolve", report._id)}>
+                                    Resolve
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -274,146 +406,149 @@ export function Admin() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       placeholder="Search users..."
+                      value={userSearchQuery}
+                      onChange={(e) => setUserSearchQuery(e.target.value)}
                       className="pl-10 bg-input border-border/50"
                     />
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Username</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Stories</TableHead>
-                      <TableHead>Joined</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.username}</TableCell>
-                        <TableCell className="text-muted-foreground">{user.email}</TableCell>
-                        <TableCell>{user.stories}</TableCell>
-                        <TableCell className="text-muted-foreground">{user.joined}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.status === "active" ? "default" : "destructive"}>
-                            {user.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Eye className="w-4 h-4 mr-2" />
-                                View Profile
-                              </DropdownMenuItem>
-                              {user.status === "active" ? (
-                                <DropdownMenuItem 
-                                  onClick={() => handleAction("ban", user.id)}
-                                  className="text-destructive"
-                                >
-                                  <Ban className="w-4 h-4 mr-2" />
-                                  Ban User
-                                </DropdownMenuItem>
-                              ) : (
-                                <DropdownMenuItem>
-                                  <Check className="w-4 h-4 mr-2" />
-                                  Unban User
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
+                {loading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Username</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {users.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                            No users found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        users.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell className="font-medium">{user.username}</TableCell>
+                            <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                            <TableCell>
+                              <Badge variant={user.role === "admin" ? "default" : user.role === "banned" ? "destructive" : "secondary"}>
+                                {user.role}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">{formatDate(user.createdAt)}</TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  {user.role !== "admin" && user.role !== "banned" && (
+                                    <DropdownMenuItem 
+                                      onClick={() => handleAction("ban", user.id.toString())}
+                                      className="text-destructive"
+                                    >
+                                      <Ban className="w-4 h-4 mr-2" />
+                                      Ban User
+                                    </DropdownMenuItem>
+                                  )}
+                                  {user.role === "banned" && (
+                                    <DropdownMenuItem onClick={() => adminService.toggleUserBan(user.id.toString(), false).then(() => loadAdminData())}>
+                                      <Check className="w-4 h-4 mr-2" />
+                                      Unban User
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Statistics Tab */}
           <TabsContent value="stats" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Platform Growth</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-muted-foreground">Stories Published</span>
-                        <span>1,234</span>
-                      </div>
-                      <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full w-[85%] bg-gradient-to-r from-primary to-secondary" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-muted-foreground">Active Users</span>
-                        <span>4,892</span>
-                      </div>
-                      <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full w-[72%] bg-gradient-to-r from-primary to-secondary" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-muted-foreground">Daily Plays</span>
-                        <span>15,234</span>
-                      </div>
-                      <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full w-[93%] bg-gradient-to-r from-primary to-secondary" />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Genres</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {[
-                      { genre: "Fantasy", count: 456, percentage: 37 },
-                      { genre: "Sci-Fi", count: 342, percentage: 28 },
-                      { genre: "Mystery", count: 234, percentage: 19 },
-                      { genre: "Horror", count: 123, percentage: 10 },
-                      { genre: "Romance", count: 79, percentage: 6 },
-                    ].map((item) => (
-                      <div key={item.genre} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 flex-1">
-                          <span className="text-sm w-20">{item.genre}</span>
-                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-to-r from-primary to-secondary"
-                              style={{ width: `${item.percentage}%` }}
-                            />
-                          </div>
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : stats ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Platform Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-muted-foreground">Total Stories</span>
+                          <span>{stats.stories.total}</span>
                         </div>
-                        <span className="text-sm text-muted-foreground w-16 text-right">
-                          {item.count}
-                        </span>
+                        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full w-full bg-gradient-to-r from-primary to-secondary" />
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+
+                      <div>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-muted-foreground">Total Users</span>
+                          <span>{stats.users.total}</span>
+                        </div>
+                        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full w-full bg-gradient-to-r from-primary to-secondary" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-muted-foreground">Total Plays</span>
+                          <span>{stats.stories.totalViews.toLocaleString()}</span>
+                        </div>
+                        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full w-full bg-gradient-to-r from-primary to-secondary" />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Reports Status</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Pending Reports</span>
+                        <span className="text-sm font-semibold">{stats.reports.pending}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Total Reports</span>
+                        <span className="text-sm font-semibold">{stats.reports.total}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
           </TabsContent>
         </Tabs>
       </main>
@@ -425,15 +560,15 @@ export function Admin() {
             <AlertDialogTitle>Confirm Action</AlertDialogTitle>
             <AlertDialogDescription>
               {actionType === "ban" && "Are you sure you want to ban this user?"}
-              {actionType === "delete" && "Are you sure you want to delete this item? This action cannot be undone."}
-              {actionType === "approve" && "Are you sure you want to approve this story for publication?"}
+              {actionType === "suspend" && "Are you sure you want to suspend this story?"}
+              {actionType === "resolve" && "Are you sure you want to resolve this report?"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmAction}
-              className={actionType === "delete" || actionType === "ban" ? "bg-destructive text-destructive-foreground" : ""}
+              className={actionType === "ban" || actionType === "suspend" ? "bg-destructive text-destructive-foreground" : ""}
             >
               Confirm
             </AlertDialogAction>

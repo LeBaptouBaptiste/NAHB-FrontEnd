@@ -6,7 +6,7 @@ import { Badge } from "../components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Star, Eye, User, Trophy, PlayCircle } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { storyService, gameService } from "../api/services";
+import { storyService, gameService, favoriteService } from "../api/services";
 import type { Story } from "../api/services";
 
 export function StoryDetails() {
@@ -14,10 +14,13 @@ export function StoryDetails() {
   const { id } = useParams();
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
         loadStory(id);
+        checkFavoriteStatus(id);
     }
   }, [id]);
 
@@ -30,6 +33,28 @@ export function StoryDetails() {
         console.error("Failed to load story:", error);
     } finally {
         setLoading(false);
+    }
+  };
+
+  const checkFavoriteStatus = async (storyId: string) => {
+    try {
+        const { favorited } = await favoriteService.checkFavorite(storyId);
+        setIsFavorited(favorited);
+    } catch (error) {
+        console.error("Failed to check favorite status:", error);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!id) return;
+    try {
+        setFavoriteLoading(true);
+        const { favorited } = await favoriteService.toggleFavorite(id);
+        setIsFavorited(favorited);
+    } catch (error) {
+        console.error("Failed to toggle favorite:", error);
+    } finally {
+        setFavoriteLoading(false);
     }
   };
 
@@ -75,10 +100,15 @@ export function StoryDetails() {
                 <User className="w-4 h-4" />
                 <span>Author ID: {story.authorId.substring(0, 8)}...</span>
               </div>
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                <span>4.5</span>
-              </div>
+              <button
+                onClick={handleToggleFavorite}
+                disabled={favoriteLoading}
+                className="flex items-center gap-1 hover:opacity-80 transition-opacity disabled:opacity-50"
+                title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+              >
+                <Star className={`w-4 h-4 ${isFavorited ? 'fill-yellow-500 text-yellow-500' : 'text-muted-foreground'}`} />
+                <span>{isFavorited ? "Favorited" : "Favorite"}</span>
+              </button>
               <div className="flex items-center gap-1">
                 <Eye className="w-4 h-4" />
                 <span>{(story.stats?.views || 0).toLocaleString()} plays</span>
