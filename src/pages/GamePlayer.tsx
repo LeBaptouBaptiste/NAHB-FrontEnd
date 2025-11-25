@@ -31,20 +31,20 @@ const GamePlayer = () => {
     const [diceConfig, setDiceConfig] = useState<{ difficulty: number; type: 'combat' | 'flee' } | null>(null);
 
     useEffect(() => {
-    const loadSession = async () => {
-        try {
-            setLoading(true);
+        const loadSession = async () => {
+            try {
+                setLoading(true);
                 const sessionData = await gameService.getSession(sessionId!);
                 setSession(sessionData);
 
                 const pageData = await pageService.getPage(sessionData.currentPageId);
                 setCurrentPage(pageData);
-        } catch (error) {
-            console.error('Failed to load session:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+            } catch (error) {
+                console.error('Failed to load session:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
         if (sessionId) {
             loadSession();

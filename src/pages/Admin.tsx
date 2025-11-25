@@ -30,11 +30,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
-import { 
-  BookOpen, 
-  Users, 
-  Flag, 
-  TrendingUp, 
+import {
+  BookOpen,
+  Users,
+  Flag,
+  TrendingUp,
   MoreVertical,
   Ban,
   Check,
@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import { adminService } from "../api/services";
 import type { Story } from "../api/services";
+import { useAuth } from "../context/AuthContext";
 
 interface AdminStats {
   users: { total: number };
@@ -75,6 +76,7 @@ interface AdminReport {
 
 export function Admin() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
@@ -86,6 +88,13 @@ export function Admin() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [reports, setReports] = useState<AdminReport[]>([]);
   const [activeTab, setActiveTab] = useState("stories");
+
+  // Redirect non-admin users
+  useEffect(() => {
+    if (user && user.role !== 'admin') {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     loadAdminData();
@@ -106,6 +115,8 @@ export function Admin() {
   const loadAdminData = async () => {
     try {
       setLoading(true);
+      console.log('[Admin] Loading admin data...');
+
       const [statsData, storiesData, usersData, reportsData] = await Promise.all([
         adminService.getStats(),
         adminService.getAllStories({ limit: 50 }),
@@ -113,12 +124,24 @@ export function Admin() {
         adminService.getAllReports({ limit: 50 }),
       ]);
 
+      console.log('[Admin] Stats data:', statsData);
+      console.log('[Admin] Stories data:', storiesData);
+      console.log('[Admin] Stories array:', storiesData.stories);
+      console.log('[Admin] Stories count:', storiesData.stories?.length || 0);
+      console.log('[Admin] Users data:', usersData);
+      console.log('[Admin] Reports data:', reportsData);
+
       setStats(statsData);
       setStories(storiesData.stories || []);
       setUsers(usersData.users || []);
       setReports(reportsData.reports || []);
     } catch (error) {
-      console.error("Failed to load admin data:", error);
+      console.error("[Admin] Failed to load admin data:", error);
+      console.error("[Admin] Error details:", {
+        message: error instanceof Error ? error.message : String(error),
+        response: (error as any)?.response?.data,
+        status: (error as any)?.response?.status,
+      });
     } finally {
       setLoading(false);
     }
@@ -197,7 +220,7 @@ export function Admin() {
   return (
     <div className="min-h-screen">
       <Navigation />
-      
+
       <main className="container mx-auto px-6 py-12">
         <div className="mb-8">
           <h1 className="mb-2">Admin Panel</h1>
@@ -456,7 +479,7 @@ export function Admin() {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   {user.role !== "admin" && user.role !== "banned" && (
-                                    <DropdownMenuItem 
+                                    <DropdownMenuItem
                                       onClick={() => handleAction("ban", user.id.toString())}
                                       className="text-destructive"
                                     >
@@ -566,7 +589,7 @@ export function Admin() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={confirmAction}
               className={actionType === "ban" || actionType === "suspend" ? "bg-destructive text-destructive-foreground" : ""}
             >

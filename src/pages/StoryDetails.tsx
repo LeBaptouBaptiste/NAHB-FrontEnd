@@ -19,52 +19,61 @@ export function StoryDetails() {
 
   useEffect(() => {
     if (id) {
-        loadStory(id);
-        checkFavoriteStatus(id);
+      loadStory(id);
+      checkFavoriteStatus(id);
     }
   }, [id]);
 
   const loadStory = async (storyId: string) => {
     try {
-        setLoading(true);
-        const data = await storyService.getStory(storyId);
-        setStory(data);
+      setLoading(true);
+      const data = await storyService.getStory(storyId);
+      setStory(data);
     } catch (error) {
-        console.error("Failed to load story:", error);
+      console.error("Failed to load story:", error);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
   const checkFavoriteStatus = async (storyId: string) => {
     try {
-        const { favorited } = await favoriteService.checkFavorite(storyId);
-        setIsFavorited(favorited);
+      const { favorited } = await favoriteService.checkFavorite(storyId);
+      setIsFavorited(favorited);
     } catch (error) {
-        console.error("Failed to check favorite status:", error);
+      console.error("Failed to check favorite status:", error);
     }
   };
 
   const handleToggleFavorite = async () => {
     if (!id) return;
     try {
-        setFavoriteLoading(true);
-        const { favorited } = await favoriteService.toggleFavorite(id);
-        setIsFavorited(favorited);
+      setFavoriteLoading(true);
+      const { favorited } = await favoriteService.toggleFavorite(id);
+      setIsFavorited(favorited);
     } catch (error) {
-        console.error("Failed to toggle favorite:", error);
+      console.error("Failed to toggle favorite:", error);
     } finally {
-        setFavoriteLoading(false);
+      setFavoriteLoading(false);
     }
   };
 
   const handleStartGame = async () => {
     if (!story) return;
     try {
-        const session = await gameService.startSession(story._id);
-        navigate(`/play/${session._id}`);
-    } catch (error) {
-        console.error("Failed to start game session:", error);
+      const session = await gameService.startSession(story._id);
+      navigate(`/play/${session._id}`);
+    } catch (error: any) {
+      console.error("Failed to start game session:", error);
+      const errorMessage = error.response?.data?.message || "Failed to start game session";
+
+      if (errorMessage.includes("no start page")) {
+        alert("This story is not ready to play yet. The author needs to set up the story pages first.");
+      } else if (errorMessage.includes("not published")) {
+        alert("This story is not published yet and cannot be played.");
+      } else {
+        alert(`Error: ${errorMessage}`);
+      }
     }
   };
 
@@ -76,11 +85,11 @@ export function StoryDetails() {
   return (
     <div className="min-h-screen">
       <Navigation />
-      
+
       <main className="container mx-auto px-6 py-12">
         {/* Hero Image */}
         <div className="relative w-full h-[400px] rounded-xl overflow-hidden mb-8">
-          <ImageWithFallback 
+          <ImageWithFallback
             src={story.imageUrl || mockImageUrl}
             alt={story.title}
             className="w-full h-full object-cover"
@@ -142,11 +151,11 @@ export function StoryDetails() {
                 <CardTitle>Endings Discovered</CardTitle>
               </CardHeader>
               <CardContent>
-                 <div className="text-muted-foreground text-sm">
-                    {Object.keys(story.stats?.endings || {}).length > 0 
-                        ? `${Object.keys(story.stats?.endings || {}).length} unique endings discovered by players.`
-                        : "No endings discovered yet. Be the first!"
-                    }
+                <div className="text-muted-foreground text-sm">
+                  {Object.keys(story.stats?.endings || {}).length > 0
+                    ? `${Object.keys(story.stats?.endings || {}).length} unique endings discovered by players.`
+                    : "No endings discovered yet. Be the first!"
+                  }
                 </div>
               </CardContent>
             </Card>
@@ -154,8 +163,8 @@ export function StoryDetails() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="w-full gap-2"
               onClick={handleStartGame}
             >
@@ -172,15 +181,15 @@ export function StoryDetails() {
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-muted-foreground">Completion Rate</span>
                     <span>
-                        {story.stats?.views > 0 
-                            ? Math.round(((story.stats?.completions || 0) / story.stats.views) * 100) 
-                            : 0}%
+                      {story.stats?.views > 0
+                        ? Math.round(((story.stats?.completions || 0) / story.stats.views) * 100)
+                        : 0}%
                     </span>
                   </div>
                   <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                        className="h-full bg-gradient-to-r from-primary to-secondary" 
-                        style={{ width: `${story.stats?.views > 0 ? Math.round(((story.stats?.completions || 0) / story.stats.views) * 100) : 0}%` }}
+                    <div
+                      className="h-full bg-gradient-to-r from-primary to-secondary"
+                      style={{ width: `${story.stats?.views > 0 ? Math.round(((story.stats?.completions || 0) / story.stats.views) * 100) : 0}%` }}
                     />
                   </div>
                 </div>
