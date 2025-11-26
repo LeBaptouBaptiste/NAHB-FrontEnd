@@ -5,7 +5,7 @@ import { StoryCard } from "../components/StoryCard";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
+import { Search, SlidersHorizontal, Loader2, Library } from "lucide-react";
 import { storyService, ratingService } from "../api/services";
 import type { Story } from "../api/services";
 import {
@@ -94,8 +94,15 @@ export function StoryListing() {
 
       <main className="container mx-auto px-6 py-12">
         <div className="mb-8">
-          <h1 className="mb-2">Discover Stories</h1>
-          <p className="text-muted-foreground">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+              <Library className="w-8 h-8 text-emerald-500" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+              Library
+            </h1>
+          </div>
+          <p className="text-muted-foreground text-lg ml-1">
             Browse through thousands of interactive adventures
           </p>
         </div>
@@ -136,6 +143,8 @@ export function StoryListing() {
                       key={tag}
                       checked={selectedTags.includes(tag)}
                       onCheckedChange={() => toggleTag(tag)}
+                      onSelect={(e) => e.preventDefault()}
+                      className="cursor-pointer focus:bg-emerald-500/10 focus:text-emerald-500 data-[highlighted]:bg-emerald-500/10 data-[highlighted]:text-emerald-500 transition-colors"
                     >
                       {tag}
                     </DropdownMenuCheckboxItem>

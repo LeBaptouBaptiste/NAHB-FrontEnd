@@ -25,20 +25,51 @@
   --aspect-video: 16 / 9;
   --default-transition-duration: .15s;
   --default-transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
 }
 
 :root {
   /* Brighter Dark Mode Palette */
-  --background: 222 47% 11%; /* Lighter, rich dark blue */
+  --background: 222 47% 11%;
+  /* Lighter, rich dark blue */
   --foreground: 210 40% 98%;
 
-  --card: 222 47% 13%; /* Slightly lighter than background */
+  --card: 222 47% 13%;
+  /* Slightly lighter than background */
   --card-foreground: 210 40% 98%;
 
   --popover: 222 47% 13%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 142 71% 45%; /* Emerald 500 */
+  --primary: 142 71% 45%;
+  /* Emerald 500 */
   --primary-foreground: 144 100% 97%;
 
   --secondary: 217 33% 17%;
@@ -53,11 +84,13 @@
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 217 33% 20%; /* Lighter border */
+  --border: 217 33% 20%;
+  /* Lighter border */
   --input: 217 33% 17%;
   --ring: 142 71% 45%;
 
-  --radius: 0.75rem; /* Rounder corners */
+  --radius: 0.75rem;
+  /* Rounder corners */
 }
 
 @layer base {
@@ -65,9 +98,10 @@
     border-color: hsl(var(--border));
     outline-color: hsl(var(--ring) / 0.5);
   }
+
   body {
     background-color: hsl(var(--background));
-    background-image: 
+    background-image:
       radial-gradient(circle at 15% 50%, hsl(142 71% 45% / 0.08), transparent 25%),
       radial-gradient(circle at 85% 30%, hsl(217 91% 60% / 0.08), transparent 25%);
     background-attachment: fixed;
@@ -79,9 +113,9 @@
   .glass-card {
     @apply bg-card/60 backdrop-blur-md border border-white/10 shadow-xl;
   }
-  
+
   .glow-hover {
-    @apply transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:border-emerald-500/50;
+    @apply transition-all duration-300 hover:shadow-[0_0_20px_#10b9814d] hover:border-emerald-500/50;
   }
 
   .text-gradient {

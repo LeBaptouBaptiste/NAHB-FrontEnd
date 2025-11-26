@@ -35,6 +35,20 @@ export interface Page {
     }[];
     isEnding: boolean;
     endingType?: 'success' | 'failure' | 'neutral';
+    hotspots?: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        targetPageId: string;
+        label?: string;
+        diceRoll?: {
+            enabled: boolean;
+            difficulty?: number;
+            type?: 'combat' | 'stealth' | 'persuasion' | 'custom';
+            failurePageId?: string;
+        };
+    }[];
 }
 
 export const storyService = {

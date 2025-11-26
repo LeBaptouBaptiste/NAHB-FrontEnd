@@ -74,4 +74,4 @@ export default defineConfig([
 TODO : 
 Deploy to a live URL (Render, Railway, Vercel)
 Add interactive illustrations with clickable zones
-CI/CD pipeline (optional)
+[X] CI/CD pipeline (optional)

@@ -18,7 +18,7 @@ export function NewStory() {
   // Manual Form State
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [theme, setTheme] = useState("");
+  const [tags, setTags] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -49,10 +49,14 @@ export function NewStory() {
     try {
       setLoading(true);
       setError(null);
+
+      // Convert comma-separated tags to array
+      const tagsArray = tags.split(',').map(t => t.trim()).filter(t => t.length > 0);
+
       const story = await storyService.createStory({
         title,
         description,
-        theme,
+        tags: tagsArray,
         imageUrl,
         status: 'draft'
       });
@@ -142,14 +146,17 @@ export function NewStory() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="theme">Theme/Genre</Label>
+                  <Label htmlFor="tags">Tags (Themes, Genres...)</Label>
                   <Input
-                    id="theme"
-                    placeholder="Fantasy, Sci-Fi, Horror..."
-                    value={theme}
-                    onChange={(e) => setTheme(e.target.value)}
+                    id="tags"
+                    placeholder="Fantasy, Adventure, Magic..."
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
                     className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Separate tags with commas
+                  </p>
                 </div>
 
                 <div className="space-y-2">

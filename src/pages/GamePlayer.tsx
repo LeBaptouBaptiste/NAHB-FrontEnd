@@ -5,6 +5,8 @@ import remarkGfm from 'remark-gfm';
 import { gameService, pageService } from '../api/services';
 import type { GameSession, Page, PathStats } from '../api/services';
 import DiceRoller from '../components/DiceRoller';
+import { HotspotLayer } from '../components/HotspotLayer';
+import type { Hotspot } from '../utils/mathUtils';
 
 interface PlayerClass {
     name: string;
@@ -30,7 +32,8 @@ const GamePlayer = () => {
     const [loading, setLoading] = useState(true);
     const [showDiceRoll, setShowDiceRoll] = useState(false);
     const [pendingChoice, setPendingChoice] = useState<number | null>(null);
-    const [diceConfig, setDiceConfig] = useState<{ difficulty: number; type: 'combat' | 'flee' } | null>(null);
+    const [pendingHotspot, setPendingHotspot] = useState<Hotspot | null>(null);
+    const [diceConfig, setDiceConfig] = useState<{ difficulty: number; type: 'combat' | 'flee' | 'stealth' | 'persuasion' | 'custom' } | null>(null);
     const [pathStats, setPathStats] = useState<PathStats | null>(null);
     const [pathStatsLoading, setPathStatsLoading] = useState(false);
 
@@ -106,6 +109,27 @@ const GamePlayer = () => {
         setShowDiceRoll(false);
 
         if (!currentPage) return;
+
+        if (pendingHotspot) {
+            // Handle hotspot result
+            const success = total >= (pendingHotspot.diceRoll?.difficulty || 10);
+            const targetId = success ? pendingHotspot.targetPageId : pendingHotspot.diceRoll?.failurePageId;
+
+            if (targetId) {
+                // Find choice leading to this target
+                const choiceIndex = currentPage.choices.findIndex(c => c.targetPageId === targetId);
+                if (choiceIndex !== -1) {
+                    await makeChoice(choiceIndex);
+                } else {
+                    // If no choice exists, we might need to force navigation or show error
+                    // For now, let's try to find ANY choice that might work or just log
+                    console.warn(`No choice found for target ${targetId} after hotspot roll`);
+                }
+            }
+            setPendingHotspot(null);
+            setDiceConfig(null);
+            return;
+        }
 
         // Find the appropriate outcome choice based on dice roll result
         // Look for choices with difficulty numbers like "[≥18]", "[14-17]", "[<14]"
@@ -274,7 +298,45 @@ const GamePlayer = () => {
                 {/* Image Section - Takes 2 columns on large screens (left) */}
                 {currentPage.image && (
                     <div className="lg:col-span-2">
-                        <div className="rounded-lg overflow-hidden border border-gray-700 sticky top-6">
+                        <div className="rounded-lg overflow-hidden border border-gray-700 sticky top-6 relative">
+                            {/* Hotspot Layer */}
+                            {currentPage.hotspots && currentPage.hotspots.length > 0 && (
+                                <div className="absolute inset-0 z-10">
+                                    <HotspotLayer
+                                        imageUrl={currentPage.image}
+                                        hotspots={currentPage.hotspots}
+                                        onHotspotClick={async (hotspot: Hotspot) => {
+                                            if (!session) return;
+
+                                            // Check for dice roll requirement
+                                            if (hotspot.diceRoll?.enabled) {
+                                                setDiceConfig({
+                                                    difficulty: hotspot.diceRoll.difficulty || 10,
+                                                    type: hotspot.diceRoll.type || 'combat'
+                                                });
+                                                // We need to store the hotspot target/failure pages to handle the result later
+                                                // Since handleDiceResult logic is currently tied to choices, we might need a temporary state
+                                                // or we can hijack the pendingChoice mechanism.
+                                                // Let's use a special negative index or a separate state for hotspot pending action.
+                                                // For simplicity, let's add a new state: pendingHotspot
+                                                setPendingHotspot(hotspot);
+                                                setShowDiceRoll(true);
+                                                return;
+                                            }
+
+                                            // Direct navigation if no dice roll
+                                            // Find choice index that leads to this page, or create a direct move if backend supports it
+                                            const choiceIndex = currentPage.choices.findIndex(c => c.targetPageId === hotspot.targetPageId);
+
+                                            if (choiceIndex !== -1) {
+                                                await makeChoice(choiceIndex);
+                                            } else {
+                                                console.warn(`No choice found for target page ${hotspot.targetPageId}`);
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            )}
                             <img
                                 src={currentPage.image}
                                 alt="Scene"
@@ -332,10 +394,16 @@ const GamePlayer = () => {
                     {showDiceRoll && diceConfig && playerClass && (
                         <DiceRoller
                             difficulty={diceConfig.difficulty}
-                            bonus={diceConfig.type === 'combat'
-                                ? playerClass.combatBonus + statBuffs.combat
-                                : playerClass.fleeBonus + statBuffs.flee}
-                            bonusLabel={diceConfig.type === 'combat' ? 'Combat' : 'Fuite'}
+                            bonus={
+                                diceConfig.type === 'combat' ? (playerClass.combatBonus + statBuffs.combat) :
+                                    (diceConfig.type === 'flee' || diceConfig.type === 'stealth') ? (playerClass.fleeBonus + statBuffs.flee) :
+                                        0 // No bonus for persuasion/custom yet
+                            }
+                            bonusLabel={
+                                diceConfig.type === 'combat' ? 'Combat' :
+                                    (diceConfig.type === 'flee' || diceConfig.type === 'stealth') ? 'Fuite/Discrétion' :
+                                        diceConfig.type === 'persuasion' ? 'Persuasion' : 'Custom'
+                            }
                             onResult={handleDiceResult}
                         />
                     )}

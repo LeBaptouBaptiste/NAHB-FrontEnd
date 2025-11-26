@@ -27,6 +27,13 @@ import { storyService, pageService, aiService, uploadService } from "../api/serv
 import type { Page, Story } from "../api/services";
 
 import { toast } from "sonner";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import { HotspotCreator } from "../components/HotspotCreator";
 
 export function StoryEditor() {
   const navigate = useNavigate();
@@ -148,8 +155,10 @@ export function StoryEditor() {
     setStory({ ...story, tags: newTags });
     try {
       await storyService.updateStory(story._id, { tags: newTags });
+      toast.success("Tags updated successfully!");
     } catch (error) {
       console.error("Failed to update tags:", error);
+      toast.error("Failed to update tags. Please try again.");
     }
   };
 
@@ -479,12 +488,17 @@ export function StoryEditor() {
                   <CardContent>
                     <Input
                       value={story.tags.join(", ")}
-                      onChange={(e) => updateStoryTags(e.target.value)}
+                      onChange={(e) => {
+                        // Just update the display value, don't parse yet
+                        const displayValue = e.target.value;
+                        setStory({ ...story, tags: displayValue.includes(',') ? displayValue.split(',').map(t => t.trim()) : [displayValue] });
+                      }}
+                      onBlur={(e) => updateStoryTags(e.target.value)}
                       placeholder="Fantasy, Adventure, Magic..."
                       className="bg-card/50 border-white/10 focus:border-emerald-500/50"
                     />
                     <p className="text-xs text-muted-foreground mt-2">
-                      Separate tags with commas
+                      Separate tags with commas. Press Tab or click outside to save.
                     </p>
                   </CardContent>
                 </Card>
@@ -512,43 +526,61 @@ export function StoryEditor() {
                 {/* Illustration Upload */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Page Illustration</CardTitle>
+                    <CardTitle className="text-base">Page Illustration & Interaction</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {selectedPage.image && (
-                        <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border/50">
-                          <img
-                            src={selectedPage.image}
-                            alt="Page illustration"
-                            className="h-full w-full object-cover"
-                          />
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-2 right-2 h-8 w-8"
-                            onClick={() => updatePageLocal(selectedPage._id, { image: undefined })}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                    <Tabs defaultValue="image" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2 mb-4">
+                        <TabsTrigger value="image">Image</TabsTrigger>
+                        <TabsTrigger value="hotspots">Hotspots</TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="image">
+                        <div className="space-y-4">
+                          {selectedPage.image && (
+                            <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border/50">
+                              <img
+                                src={selectedPage.image}
+                                alt="Page illustration"
+                                className="h-full w-full object-contain bg-black/20"
+                              />
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-2 right-2 h-8 w-8"
+                                onClick={() => updatePageLocal(selectedPage._id, { image: undefined })}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                          <div className="border-2 border-dashed border-border/50 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer relative">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              onChange={handleImageUpload}
+                            />
+                            <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Click to upload or drag and drop
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              PNG, JPG up to 5MB
+                            </p>
+                          </div>
                         </div>
-                      )}
-                      <div className="border-2 border-dashed border-border/50 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer relative">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          onChange={handleImageUpload}
+                      </TabsContent>
+
+                      <TabsContent value="hotspots">
+                        <HotspotCreator
+                          imageUrl={selectedPage.image || ''}
+                          initialHotspots={selectedPage.hotspots || []}
+                          availablePages={pages.map((p, index) => ({ id: p._id, title: `Page ${index + 1}` }))}
+                          onSave={(hotspots) => updatePageLocal(selectedPage._id, { hotspots })}
                         />
-                        <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Click to upload or drag and drop
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          PNG, JPG up to 5MB
-                        </p>
-                      </div>
-                    </div>
+                      </TabsContent>
+                    </Tabs>
                   </CardContent>
                 </Card>
 

@@ -10,7 +10,8 @@ import {
   Trash2,
   Eye,
   GitBranch,
-  MoreVertical
+  MoreVertical,
+  FileText
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -145,8 +146,15 @@ export function MyStories() {
       <main className="container mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="mb-2 text-4xl font-bold text-gradient">My Stories</h1>
-            <p className="text-muted-foreground">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+                <FileText className="w-8 h-8 text-emerald-500" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+                My Stories
+              </h1>
+            </div>
+            <p className="text-muted-foreground text-lg ml-1">
               Create and manage your interactive adventures
             </p>
           </div>
