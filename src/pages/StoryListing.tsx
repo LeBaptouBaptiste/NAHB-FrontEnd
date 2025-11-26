@@ -8,8 +8,14 @@ import { Badge } from "../components/ui/badge";
 import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
 import { storyService, ratingService } from "../api/services";
 import type { Story } from "../api/services";
-
-const allTags = ["Fantasy", "Sci-Fi", "Mystery", "Horror", "Adventure", "Romance", "Thriller", "Cyberpunk", "Magic", "Space"];
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 
 export function StoryListing() {
   const navigate = useNavigate();
@@ -18,10 +24,21 @@ export function StoryListing() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
 
   useEffect(() => {
     loadStories();
+    loadTags();
   }, [searchQuery]); // Reload when search changes (debouncing would be better in prod)
+
+  const loadTags = async () => {
+    try {
+      const tags = await storyService.getTags();
+      setAvailableTags(tags);
+    } catch (error) {
+      console.error("Failed to load tags:", error);
+    }
+  };
 
   const loadStories = async () => {
     try {
@@ -95,28 +112,65 @@ export function StoryListing() {
                 className="pl-10 bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/50 focus:border-emerald-500 transition-all shadow-sm"
               />
             </div>
-            <Button variant="outline" className="gap-2 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-500 dark:hover:bg-emerald-950/20 transition-colors cursor-pointer">
-              <SlidersHorizontal className="w-4 h-4" />
-              Filters
-            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-500 dark:hover:bg-emerald-950/20 transition-colors cursor-pointer">
+                  <SlidersHorizontal className="w-4 h-4" />
+                  Filters
+                  {selectedTags.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                      {selectedTags.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-y-auto">
+                <DropdownMenuLabel>Filter by Tags</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {availableTags.length === 0 ? (
+                  <div className="p-2 text-sm text-muted-foreground text-center">No tags available</div>
+                ) : (
+                  availableTags.map(tag => (
+                    <DropdownMenuCheckboxItem
+                      key={tag}
+                      checked={selectedTags.includes(tag)}
+                      onCheckedChange={() => toggleTag(tag)}
+                    >
+                      {tag}
+                    </DropdownMenuCheckboxItem>
+                  ))
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          {/* Tag Filter */}
-          <div className="flex flex-wrap gap-2">
-            {allTags.map(tag => (
-              <Badge
-                key={tag}
-                variant={selectedTags.includes(tag) ? "default" : "outline"}
-                className={`cursor-pointer transition-all ${selectedTags.includes(tag)
-                  ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white border-transparent hover:from-emerald-700 hover:to-green-700 shadow-md'
-                  : 'hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-500 dark:hover:bg-emerald-950/20'
-                  }`}
-                onClick={() => toggleTag(tag)}
+          {/* Active Tags */}
+          {selectedTags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selectedTags.map(tag => (
+                <Badge
+                  key={tag}
+                  variant="default"
+                  className="cursor-pointer transition-all bg-gradient-to-r from-emerald-600 to-green-600 text-white border-transparent hover:from-emerald-700 hover:to-green-700 shadow-md pr-1"
+                  onClick={() => toggleTag(tag)}
+                >
+                  {tag}
+                  <span className="ml-1 hover:bg-white/20 rounded-full p-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                  </span>
+                </Badge>
+              ))}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => setSelectedTags([])}
               >
-                {tag}
-              </Badge>
-            ))}
-          </div>
+                Clear all
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Story Grid */}

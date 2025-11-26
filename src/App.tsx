@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "sonner";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Dashboard } from "./pages/Dashboard";
@@ -30,10 +31,11 @@ export default function App() {
         <Route path="/editor/:id" element={<StoryEditor />} />
         <Route path="/editor/:id/flow" element={<StoryFlowView />} />
         <Route path="/admin" element={<Admin />} />
-        
+
         {/* Integrated GamePlayer Route */}
         <Route path="/play/:sessionId" element={<GamePlayer />} />
       </Routes>
+      <Toaster position="top-right" richColors />
     </Router>
   );
 }

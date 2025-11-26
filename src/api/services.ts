@@ -43,6 +43,10 @@ export const storyService = {
         const response = await api.get<Story[]>('/stories/published', { params });
         return response.data;
     },
+    getTags: async () => {
+        const response = await api.get<string[]>('/stories/tags');
+        return response.data;
+    },
     getStory: async (id: string) => {
         const response = await api.get<Story>(`/stories/${id}`);
         return response.data;

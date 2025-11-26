@@ -30,6 +30,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { storyService, ratingService } from "../api/services";
 import type { Story } from "../api/services";
+import { toast } from "sonner";
 
 export function MyStories() {
   const navigate = useNavigate();
@@ -100,8 +101,15 @@ export function MyStories() {
       const newStatus = story.status === "published" ? "draft" : "published";
       const updatedStory = await storyService.updateStory(story._id, { status: newStatus });
       setStories(stories.map(s => s._id === story._id ? updatedStory : s));
+
+      if (newStatus === "published") {
+        toast.success(`"${story.title}" has been published!`);
+      } else {
+        toast.success(`"${story.title}" is now a draft.`);
+      }
     } catch (error) {
       console.error("Failed to update story status:", error);
+      toast.error("Failed to update story status. Please try again.");
     }
   };
 
@@ -219,9 +227,7 @@ export function MyStories() {
                         <GitBranch className="w-4 h-4 mr-2" />
                         View Flow
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => togglePublish(story)}>
-                        {story.status === "published" ? "Unpublish" : "Publish"}
-                      </DropdownMenuItem>
+
                       <DropdownMenuItem
                         onClick={() => handleDelete(story._id)}
                         className="text-destructive"
@@ -264,6 +270,7 @@ export function MyStories() {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
                   onClick={() => navigate(`/editor/${story._id}`)}
                 >
                   <Edit className="w-4 h-4 mr-2" />
@@ -272,15 +279,27 @@ export function MyStories() {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
                   onClick={() => navigate(`/editor/${story._id}/flow`)}
                 >
                   <GitBranch className="w-4 h-4 mr-2" />
                   View Flow
                 </Button>
+                <Button
+                  variant={story.status === "published" ? "secondary" : "default"}
+                  size="sm"
+                  className={story.status === "published"
+                    ? "hover:bg-amber-500/10 hover:text-amber-500 border-amber-500/20"
+                    : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"}
+                  onClick={() => togglePublish(story)}
+                >
+                  {story.status === "published" ? "Unpublish" : "Publish"}
+                </Button>
                 {story.status === "published" && (
                   <Button
                     variant="outline"
                     size="sm"
+                    className="hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
                     onClick={() => navigate(`/story/${story._id}`)}
                   >
                     <Eye className="w-4 h-4 mr-2" />

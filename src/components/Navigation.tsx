@@ -1,15 +1,12 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BookOpen, Home, Library, FileText, Shield, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { NavButton } from "./ui/NavigationButton";
 import { useAuth } from "../context/AuthContext";
 
 export function Navigation() {
-  const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-
-  const isActive = (path: string) => location.pathname === path;
 
   const handleLogout = () => {
     logout();
@@ -58,7 +55,7 @@ export function Navigation() {
           <Button
             variant="ghost"
             size="sm"
-            className="gap-2 hover:bg-white/5 hover:text-emerald-400 transition-colors"
+            className="gap-2 hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors"
             onClick={handleLogout}
           >
             <LogOut className="w-4 h-4" />
