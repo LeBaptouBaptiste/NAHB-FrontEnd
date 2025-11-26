@@ -80,6 +80,7 @@ export function HotspotCreator({ imageUrl, initialHotspots = [], onSave, availab
     };
 
     const handleSave = () => {
+        console.log("HotspotCreator: handleSave clicked", hotspots);
         onSave(hotspots);
     };
 

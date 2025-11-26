@@ -177,29 +177,31 @@ const GamePlayer = () => {
         setDiceConfig(null);
     };
 
-    const makeChoice = async (choiceIndex: number) => {
+    const makeChoice = async (choiceIndex: number, hotspotIndex?: number) => {
         if (!session || !currentPage) return;
 
         try {
-            // Check if choice grants items or buffs
-            const choiceText = currentPage.choices[choiceIndex]?.text || '';
+            // Check if choice grants items or buffs (only for regular choices)
+            if (choiceIndex !== -1) {
+                const choiceText = currentPage.choices[choiceIndex]?.text || '';
 
-            // Detect item collection
-            if (choiceText.includes('potion') || choiceText.includes('Prendre la potion')) {
-                setInventory(prev => [...prev, 'potion']);
-            }
-            if (choiceText.includes('médaillon') || choiceText.includes('Prendre le médaillon')) {
-                setInventory(prev => [...prev, 'medallion']);
-            }
-            if (choiceText.includes('Prendre tout')) {
-                setInventory(prev => [...prev, 'potion', 'medallion', 'stone']);
-            }
-            if (choiceText.includes('dague de qualité')) {
-                setInventory(prev => [...prev, 'superior_dagger']);
-                setStatBuffs(prev => ({ ...prev, combat: prev.combat + 2 }));
+                // Detect item collection
+                if (choiceText.includes('potion') || choiceText.includes('Prendre la potion')) {
+                    setInventory(prev => [...prev, 'potion']);
+                }
+                if (choiceText.includes('médaillon') || choiceText.includes('Prendre le médaillon')) {
+                    setInventory(prev => [...prev, 'medallion']);
+                }
+                if (choiceText.includes('Prendre tout')) {
+                    setInventory(prev => [...prev, 'potion', 'medallion', 'stone']);
+                }
+                if (choiceText.includes('dague de qualité')) {
+                    setInventory(prev => [...prev, 'superior_dagger']);
+                    setStatBuffs(prev => ({ ...prev, combat: prev.combat + 2 }));
+                }
             }
 
-            const response = await gameService.makeChoice(session._id, choiceIndex);
+            const response = await gameService.makeChoice(session._id, choiceIndex, hotspotIndex);
 
             setSession(response);
 
@@ -314,24 +316,21 @@ const GamePlayer = () => {
                                                     difficulty: hotspot.diceRoll.difficulty || 10,
                                                     type: hotspot.diceRoll.type || 'combat'
                                                 });
-                                                // We need to store the hotspot target/failure pages to handle the result later
-                                                // Since handleDiceResult logic is currently tied to choices, we might need a temporary state
-                                                // or we can hijack the pendingChoice mechanism.
-                                                // Let's use a special negative index or a separate state for hotspot pending action.
-                                                // For simplicity, let's add a new state: pendingHotspot
                                                 setPendingHotspot(hotspot);
                                                 setShowDiceRoll(true);
                                                 return;
                                             }
 
-                                            // Direct navigation if no dice roll
-                                            // Find choice index that leads to this page, or create a direct move if backend supports it
-                                            const choiceIndex = currentPage.choices.findIndex(c => c.targetPageId === hotspot.targetPageId);
+                                            // Direct navigation via hotspot index
+                                            // We need to find the index of this hotspot in the current page's hotspots array
+                                            const hotspotIndex = currentPage.hotspots?.findIndex(h =>
+                                                h.x === hotspot.x && h.y === hotspot.y && h.width === hotspot.width && h.height === hotspot.height
+                                            );
 
-                                            if (choiceIndex !== -1) {
-                                                await makeChoice(choiceIndex);
+                                            if (hotspotIndex !== undefined && hotspotIndex !== -1) {
+                                                await makeChoice(-1, hotspotIndex); // Pass -1 for choiceIndex, and the real hotspotIndex
                                             } else {
-                                                console.warn(`No choice found for target page ${hotspot.targetPageId}`);
+                                                console.warn(`Hotspot not found in page data`);
                                             }
                                         }}
                                     />
