@@ -196,8 +196,6 @@ export function StoryDetails() {
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (!story) return <div className="min-h-screen flex items-center justify-center">Story not found</div>;
 
-  const mockImageUrl = "https://images.unsplash.com/photo-1534447677768-be436bb09401?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYW50YXN5JTIwbGFuZHNjYXBlfGVufDF8fHx8MTc2Mzk5NjkzMXww&ixlib=rb-4.1.0&q=80&w=1080";
-
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -206,7 +204,7 @@ export function StoryDetails() {
         {/* Hero Image */}
         <div className="relative w-full h-[400px] rounded-xl overflow-hidden mb-8">
           <ImageWithFallback
-            src={story.imageUrl || mockImageUrl}
+            src={story.imageUrl || ""}
             alt={story.title}
             className="w-full h-full object-cover"
           />

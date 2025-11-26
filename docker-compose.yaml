@@ -1,0 +1,22 @@
+services:
+  nahb-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PORT: ${PORT}   # Passe la variable au build
+    container_name: nahb-frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT}
+      VITE_API_URL: ${VITE_API_URL}
+    ports:
+      - "${PORT}:${PORT}"  # Port dynamique
+    networks:
+      - nahb-network
+
+networks:
+  nahb-network:
+    driver: bridge

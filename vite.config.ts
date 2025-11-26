@@ -11,4 +11,8 @@ export default defineConfig({
     },
   },
   plugins: [react(), tailwindcss()],
+  preview: {
+    port: 10004,
+    allowedHosts: ["nahb.speakzy.fr"]
+  }
 })
