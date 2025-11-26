@@ -91,6 +91,21 @@ export function StoryEditor() {
     }
   };
 
+  const saveStoryboard = async () => {
+    if (!story) return;
+    try {
+      setSaving(true);
+      // Story metadata is already being updated in real-time via updateStoryTitle, etc.
+      // This is just a manual save trigger with confirmation
+      toast.success("Storyboard saved successfully!");
+    } catch (error) {
+      console.error("Failed to save storyboard:", error);
+      toast.error("Failed to save storyboard. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const updateStoryTitle = async (newTitle: string) => {
     if (!story) return;
     setStory({ ...story, title: newTitle });
@@ -323,11 +338,11 @@ export function StoryEditor() {
               <Button
                 size="sm"
                 className="gap-2 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all flex-1 lg:flex-none"
-                onClick={saveCurrentPage}
+                onClick={isStoryboardView ? saveStoryboard : saveCurrentPage}
                 disabled={saving}
               >
                 <Save className="w-4 h-4" />
-                {saving ? "Saving..." : "Save Page"}
+                {saving ? "Saving..." : isStoryboardView ? "Save Storyboard" : "Save Page"}
               </Button>
             </div>
           </div>
