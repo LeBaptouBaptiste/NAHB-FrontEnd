@@ -71,21 +71,21 @@ export function Dashboard() {
       title: "Browse Stories",
       description: "Discover new adventures",
       icon: Library,
-      gradient: "from-primary to-primary/70",
+      gradient: "from-emerald-500 to-green-500",
       onClick: () => navigate("/stories"),
     },
     {
       title: "Continue Reading",
       description: "Pick up where you left off",
       icon: BookOpen,
-      gradient: "from-secondary to-secondary/70",
+      gradient: "from-cyan-500 to-blue-500",
       onClick: () => navigate("/stories"),
     },
     {
       title: "My Stories",
       description: "Manage your creations",
       icon: FileText,
-      gradient: "from-purple-500 to-pink-500",
+      gradient: "from-emerald-600 to-teal-600",
       onClick: () => navigate("/my-stories"),
     },
   ];
@@ -93,12 +93,12 @@ export function Dashboard() {
   return (
     <div className="min-h-screen">
       <Navigation />
-      
+
       <main className="container mx-auto px-6 py-12">
         {/* Welcome Section */}
         <div className="mb-12">
-          <h1 className="mb-2">Welcome back!</h1>
-          <p className="text-muted-foreground">
+          <h1 className="mb-2 text-4xl font-bold text-gradient">Welcome back!</h1>
+          <p className="text-muted-foreground text-lg">
             Ready to continue your adventure or create something new?
           </p>
         </div>
@@ -106,21 +106,21 @@ export function Dashboard() {
         {/* Shortcuts */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {shortcuts.map((shortcut) => (
-            <Card 
+            <Card
               key={shortcut.title}
-              className="overflow-hidden cursor-pointer hover:border-primary/50 transition-all group"
+              className="overflow-hidden cursor-pointer bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/50 hover:shadow-xl transition-all duration-300 group"
               onClick={shortcut.onClick}
             >
               <div className={`h-2 bg-gradient-to-r ${shortcut.gradient}`} />
               <CardHeader className="pb-4">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${shortcut.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <shortcut.icon className="w-6 h-6 text-white" />
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${shortcut.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
+                  <shortcut.icon className="w-7 h-7 text-white" />
                 </div>
-                <CardTitle>{shortcut.title}</CardTitle>
+                <CardTitle className="text-xl">{shortcut.title}</CardTitle>
                 <CardDescription>{shortcut.description}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="ghost" className="w-full group-hover:bg-primary/10">
+                <Button variant="ghost" className="w-full group-hover:bg-emerald-500/10 group-hover:text-emerald-400 transition-colors">
                   Get Started →
                 </Button>
               </CardContent>
@@ -138,15 +138,15 @@ export function Dashboard() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {statsDisplay.map((stat) => (
-                <Card key={stat.label}>
+                <Card key={stat.label} className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/30 transition-all shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-sm text-muted-foreground">
                       {stat.label}
                     </CardTitle>
-                    <stat.icon className={`w-4 h-4 ${stat.color}`} />
+                    <stat.icon className={`w-5 h-5 ${stat.color}`} />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-semibold">{stat.value}</div>
+                    <div className="text-3xl font-bold text-emerald-500">{stat.value}</div>
                   </CardContent>
                 </Card>
               ))}
@@ -164,24 +164,24 @@ export function Dashboard() {
           ) : continueReading.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {continueReading.map(({ session, story, progress }) => (
-                <Card key={session._id} className="hover:border-primary/50 transition-all">
+                <Card key={session._id} className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/50 hover:shadow-lg transition-all duration-300">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div>
                         <CardTitle>{story.title}</CardTitle>
                         <CardDescription>Author ID: {story.authorId.substring(0, 8)}...</CardDescription>
                       </div>
-                      <div className="text-sm text-muted-foreground">{Math.round(progress)}% complete</div>
+                      <div className="text-sm font-medium text-emerald-500">{Math.round(progress)}% complete</div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">
-                      <div className="h-full bg-gradient-to-r from-primary to-secondary" style={{ width: `${progress}%` }} />
+                    <div className="w-full h-2.5 bg-muted/50 rounded-full overflow-hidden mb-4">
+                      <div className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-full" style={{ width: `${progress}%` }} />
                     </div>
                     <p className="text-sm text-muted-foreground mb-4">
                       Last read: {session.history.length} pages visited
                     </p>
-                    <Button className="w-full" onClick={() => handleContinueStory(session._id)}>
+                    <Button className="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all" onClick={() => handleContinueStory(session._id)}>
                       Continue Story
                     </Button>
                   </CardContent>

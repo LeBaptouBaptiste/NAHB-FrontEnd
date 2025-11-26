@@ -8,7 +8,7 @@ const Home = () => {
     return (
         <div className="max-w-4xl mx-auto mt-16 text-center px-6">
             <div className="mb-12">
-                <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-500 to-green-600 bg-clip-text text-transparent">
+                <h1 className="text-6xl font-bold mb-6 text-gradient pb-2">
                     Welcome to NAHB
                 </h1>
                 <p className="text-xl text-muted-foreground mb-8">

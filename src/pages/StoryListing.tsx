@@ -92,7 +92,7 @@ export function StoryListing() {
                 placeholder="Search stories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-card border-border/50 hover:border-border focus:border-emerald-500 transition-colors"
+                className="pl-10 bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/50 focus:border-emerald-500 transition-all shadow-sm"
               />
             </div>
             <Button variant="outline" className="gap-2 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-500 dark:hover:bg-emerald-950/20 transition-colors cursor-pointer">
@@ -108,8 +108,8 @@ export function StoryListing() {
                 key={tag}
                 variant={selectedTags.includes(tag) ? "default" : "outline"}
                 className={`cursor-pointer transition-all ${selectedTags.includes(tag)
-                    ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white border-transparent hover:from-emerald-700 hover:to-green-700 shadow-md'
-                    : 'hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-500 dark:hover:bg-emerald-950/20'
+                  ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white border-transparent hover:from-emerald-700 hover:to-green-700 shadow-md'
+                  : 'hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-500 dark:hover:bg-emerald-950/20'
                   }`}
                 onClick={() => toggleTag(tag)}
               >

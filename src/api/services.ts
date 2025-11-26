@@ -27,6 +27,11 @@ export interface Page {
     choices: {
         text: string;
         targetPageId: string;
+        diceRoll?: {
+            enabled: boolean;
+            difficulty?: number; // DC (Difficulty Class)
+            type?: 'combat' | 'stealth' | 'persuasion' | 'custom';
+        };
     }[];
     isEnding: boolean;
     endingType?: 'success' | 'failure' | 'neutral';

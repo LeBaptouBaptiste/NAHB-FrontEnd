@@ -27,7 +27,7 @@ export function StoryCard({
 }: StoryCardProps) {
   return (
     <Card
-      className="overflow-hidden border-border/50 hover:border-emerald-500/50 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+      className="overflow-hidden border-border/50 glow-hover cursor-pointer group bg-card/50 backdrop-blur-sm"
       onClick={onClick}
     >
       <div className="aspect-video w-full bg-muted relative overflow-hidden">

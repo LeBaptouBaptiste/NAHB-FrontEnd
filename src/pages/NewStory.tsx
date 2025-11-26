@@ -45,7 +45,7 @@ export function NewStory() {
 
   const handleManualCreate = async () => {
     if (!title) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -84,7 +84,7 @@ export function NewStory() {
         numPages,
         language: 'fr' // defaulting to French based on context
       });
-      
+
       if (result && result.storyId) {
         navigate(`/editor/${result.storyId}`);
       } else {
@@ -101,12 +101,12 @@ export function NewStory() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <main className="container mx-auto px-6 py-12 flex items-center justify-center min-h-[80vh]">
-        <Card className="w-full max-w-2xl">
+        <Card className="w-full max-w-2xl bg-card/60 backdrop-blur-md border-white/10 shadow-2xl">
           <CardHeader>
-            <CardTitle className="text-2xl">Create New Story</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-3xl font-bold text-gradient">Create New Story</CardTitle>
+            <CardDescription className="text-base">
               Choose how you want to start your new adventure
             </CardDescription>
           </CardHeader>
@@ -116,37 +116,39 @@ export function NewStory() {
                 {error}
               </div>
             )}
-            
+
             <Tabs defaultValue="manual" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="manual">
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 p-1">
+                <TabsTrigger value="manual" className="cursor-pointer data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
                   <BookOpen className="w-4 h-4 mr-2" />
                   Manual Creation
                 </TabsTrigger>
-                <TabsTrigger value="ai">
+                <TabsTrigger value="ai" className="cursor-pointer data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
                   <Wand2 className="w-4 h-4 mr-2" />
                   Generate with AI
                 </TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="manual" className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Story Title</Label>
-                  <Input 
-                    id="title" 
-                    placeholder="The Lost Kingdom" 
+                  <Input
+                    id="title"
+                    placeholder="The Lost Kingdom"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
+                    className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="theme">Theme/Genre</Label>
-                  <Input 
-                    id="theme" 
-                    placeholder="Fantasy, Sci-Fi, Horror..." 
+                  <Input
+                    id="theme"
+                    placeholder="Fantasy, Sci-Fi, Horror..."
                     value={theme}
                     onChange={(e) => setTheme(e.target.value)}
+                    className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors"
                   />
                 </div>
 
@@ -155,9 +157,9 @@ export function NewStory() {
                   {imageUrl ? (
                     <div className="space-y-2">
                       <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border/50">
-                        <img 
-                          src={imageUrl} 
-                          alt="Story cover" 
+                        <img
+                          src={imageUrl}
+                          alt="Story cover"
                           className="h-full w-full object-cover"
                         />
                         <Button
@@ -171,7 +173,7 @@ export function NewStory() {
                       </div>
                     </div>
                   ) : (
-                    <div className="border-2 border-dashed border-border/50 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer relative">
+                    <div className="border-2 border-dashed border-emerald-500/30 rounded-lg p-8 text-center hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all cursor-pointer relative">
                       <input
                         type="file"
                         accept="image/*"
@@ -202,36 +204,42 @@ export function NewStory() {
 
                 <div className="space-y-2">
                   <Label htmlFor="desc">Description</Label>
-                  <Textarea 
-                    id="desc" 
-                    placeholder="A brief summary of your story..." 
+                  <Textarea
+                    id="desc"
+                    placeholder="A brief summary of your story..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors min-h-[100px]"
                   />
                 </div>
 
-                <Button 
-                  className="w-full mt-4" 
-                  onClick={handleManualCreate} 
+                <Button
+                  className="w-full mt-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                  onClick={handleManualCreate}
                   disabled={loading || !title}
                 >
                   {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Create Story
                 </Button>
               </TabsContent>
-              
+
               <TabsContent value="ai" className="space-y-4">
-                <div className="bg-muted/50 p-4 rounded-lg mb-4 text-sm text-muted-foreground">
-                  AI generation will create a full story structure with pages and choices based on your prompt.
-                  This process may take a minute.
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-lg mb-4 text-sm">
+                  <div className="flex items-start gap-2">
+                    <Wand2 className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-muted-foreground">
+                      AI generation will create a full story structure with pages and choices based on your prompt.
+                      This process may take a minute.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="prompt">Story Prompt</Label>
-                  <Textarea 
-                    id="prompt" 
-                    placeholder="A detective investigating a murder in a cyberpunk city..." 
-                    className="min-h-[100px]"
+                  <Textarea
+                    id="prompt"
+                    placeholder="A detective investigating a murder in a cyberpunk city..."
+                    className="min-h-[120px] bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors"
                     value={aiPrompt}
                     onChange={(e) => setAiPrompt(e.target.value)}
                   />
@@ -240,27 +248,29 @@ export function NewStory() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="ai-theme">Theme</Label>
-                    <Input 
-                      id="ai-theme" 
+                    <Input
+                      id="ai-theme"
                       value={aiTheme}
                       onChange={(e) => setAiTheme(e.target.value)}
+                      className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="pages">Approx. Pages</Label>
-                    <Input 
-                      id="pages" 
-                      type="number" 
-                      min={3} 
+                    <Input
+                      id="pages"
+                      type="number"
+                      min={3}
                       max={20}
                       value={numPages}
                       onChange={(e) => setNumPages(parseInt(e.target.value))}
+                      className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors"
                     />
                   </div>
                 </div>
 
-                <Button 
-                  className="w-full mt-4" 
+                <Button
+                  className="w-full mt-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer"
                   onClick={handleAiGenerate}
                   disabled={loading || !aiPrompt}
                 >

@@ -137,14 +137,14 @@ export function MyStories() {
       <main className="container mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="mb-2">My Stories</h1>
+            <h1 className="mb-2 text-4xl font-bold text-gradient">My Stories</h1>
             <p className="text-muted-foreground">
               Create and manage your interactive adventures
             </p>
           </div>
 
           <Button
-            className="gap-2"
+            className="gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all"
             onClick={() => navigate("/editor/new")}
           >
             <Plus className="w-4 h-4" />
@@ -154,32 +154,32 @@ export function MyStories() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/30 transition-all shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm text-muted-foreground">Total Stories</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold">{stories.length}</div>
+              <div className="text-3xl font-bold text-emerald-500">{stories.length}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/30 transition-all shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm text-muted-foreground">Total Plays</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold">
+              <div className="text-3xl font-bold text-emerald-500">
                 {getTotalPlays().toLocaleString()}
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/30 transition-all shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm text-muted-foreground">Avg Rating</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold">
+              <div className="text-3xl font-bold text-yellow-500">
                 {getAvgRating()}
               </div>
             </CardContent>
@@ -189,7 +189,7 @@ export function MyStories() {
         {/* Stories List */}
         <div className="space-y-4">
           {stories.map(story => (
-            <Card key={story._id} className="hover:border-primary/50 transition-all">
+            <Card key={story._id} className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/50 hover:shadow-lg transition-all duration-300">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

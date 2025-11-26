@@ -17,14 +17,14 @@ export function Navigation() {
   };
 
   return (
-    <nav className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+    <nav className="border-b border-white/10 bg-background/60 backdrop-blur-md sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link to="/dashboard" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-emerald-500/20 transition-all">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <span className="font-bold text-xl bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
               NAHB
             </span>
           </Link>
@@ -58,7 +58,7 @@ export function Navigation() {
           <Button
             variant="ghost"
             size="sm"
-            className="gap-2"
+            className="gap-2 hover:bg-white/5 hover:text-emerald-400 transition-colors"
             onClick={handleLogout}
           >
             <LogOut className="w-4 h-4" />
@@ -66,12 +66,12 @@ export function Navigation() {
           </Button>
           {user && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center cursor-pointer">
-                <span className="text-sm text-white font-medium">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center cursor-pointer shadow-md border border-white/10">
+                <span className="text-sm text-white font-bold">
                   {user.username.substring(0, 2).toUpperCase()}
                 </span>
               </div>
-              <span className="text-sm font-medium hidden sm:inline">
+              <span className="text-sm font-medium hidden sm:inline text-muted-foreground">
                 {user.username}
               </span>
             </div>
