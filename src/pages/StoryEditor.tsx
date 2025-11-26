@@ -284,45 +284,6 @@ export function StoryEditor() {
                 className="bg-transparent border-none text-lg font-semibold focus-visible:ring-0 px-2 w-full lg:w-[300px]"
                 placeholder="Story Title"
               />
-
-              {/* Story Cover Image Upload */}
-              <div className="relative">
-                {story.imageUrl ? (
-                  <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border/50">
-                    <img
-                      src={story.imageUrl}
-                      alt="Story cover"
-                      className="w-full h-full object-cover"
-                    />
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-0 right-0 h-4 w-4"
-                      onClick={async () => {
-                        if (story) {
-                          setStory({ ...story, imageUrl: undefined });
-                          await storyService.updateStory(story._id, { imageUrl: undefined });
-                        }
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ) : (
-                  <label className="cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleStoryImageUpload}
-                      disabled={saving}
-                    />
-                    <div className="w-16 h-16 rounded-lg border-2 border-dashed border-border/50 flex items-center justify-center hover:border-primary/50 transition-colors">
-                      <Upload className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                  </label>
-                )}
-              </div>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
