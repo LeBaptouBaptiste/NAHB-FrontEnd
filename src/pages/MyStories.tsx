@@ -161,37 +161,39 @@ export function MyStories() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/30 transition-all shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm text-muted-foreground">Total Stories</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-emerald-500">{stories.length}</div>
-            </CardContent>
-          </Card>
+        <div className="overflow-x-auto pb-4 -mx-6 px-6 md:mx-0 md:px-0">
+          <div className="flex md:grid md:grid-cols-3 gap-6 mb-8 min-w-max md:min-w-0">
+            <Card className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/30 transition-all shadow-sm min-w-[200px] md:min-w-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm text-muted-foreground">Total Stories</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-emerald-500">{stories.length}</div>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/30 transition-all shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm text-muted-foreground">Total Plays</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-emerald-500">
-                {getTotalPlays().toLocaleString()}
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/30 transition-all shadow-sm min-w-[200px] md:min-w-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm text-muted-foreground">Total Plays</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-emerald-500">
+                  {getTotalPlays().toLocaleString()}
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/30 transition-all shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm text-muted-foreground">Avg Rating</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-yellow-500">
-                {getAvgRating()}
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/30 transition-all shadow-sm min-w-[200px] md:min-w-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm text-muted-foreground">Avg Rating</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-yellow-500">
+                  {getAvgRating()}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Stories List */}
@@ -266,11 +268,11 @@ export function MyStories() {
                 </div>
               </CardContent>
 
-              <CardFooter className="border-t border-border/50 pt-4 gap-2">
+              <CardFooter className="border-t border-border/50 pt-4 gap-2 flex-wrap">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
+                  className="hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all flex-1 min-w-[100px]"
                   onClick={() => navigate(`/editor/${story._id}`)}
                 >
                   <Edit className="w-4 h-4 mr-2" />
@@ -279,7 +281,7 @@ export function MyStories() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
+                  className="hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all flex-1 min-w-[100px]"
                   onClick={() => navigate(`/editor/${story._id}/flow`)}
                 >
                   <GitBranch className="w-4 h-4 mr-2" />
@@ -288,9 +290,9 @@ export function MyStories() {
                 <Button
                   variant={story.status === "published" ? "secondary" : "default"}
                   size="sm"
-                  className={story.status === "published"
+                  className={`flex-1 min-w-[100px] ${story.status === "published"
                     ? "hover:bg-amber-500/10 hover:text-amber-500 border-amber-500/20"
-                    : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"}
+                    : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"}`}
                   onClick={() => togglePublish(story)}
                 >
                   {story.status === "published" ? "Unpublish" : "Publish"}
@@ -299,7 +301,7 @@ export function MyStories() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
+                    className="hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all flex-1 min-w-[100px]"
                     onClick={() => navigate(`/story/${story._id}`)}
                   >
                     <Eye className="w-4 h-4 mr-2" />

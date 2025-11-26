@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { gameService, pageService } from '../api/services';
 import type { GameSession, Page, PathStats } from '../api/services';
 import DiceRoller from '../components/DiceRoller';
@@ -286,12 +288,43 @@ const GamePlayer = () => {
                 <div className={`${currentPage.image ? 'lg:col-span-1' : 'lg:col-span-3'} space-y-6`}>
                     {/* Page Content */}
                     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-                        <div className="prose prose-invert max-w-none">
-                            {currentPage.content.split('\n').map((paragraph, index) => (
-                                <p key={index} className="text-gray-300 mb-3 whitespace-pre-wrap">
-                                    {paragraph}
-                                </p>
-                            ))}
+                        <div className="prose prose-invert prose-emerald max-w-none text-gray-300">
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                    h1: ({ ...props }) => <h1 className="text-3xl font-bold text-emerald-400 mb-4" {...props} />,
+                                    h2: ({ ...props }) => <h2 className="text-2xl font-bold text-emerald-400 mb-3" {...props} />,
+                                    h3: ({ ...props }) => <h3 className="text-xl font-semibold text-emerald-400 mb-2" {...props} />,
+                                    h4: ({ ...props }) => <h4 className="text-lg font-semibold text-emerald-400 mb-2" {...props} />,
+                                    p: ({ ...props }) => <p className="text-gray-300 mb-3 leading-relaxed" {...props} />,
+                                    strong: ({ ...props }) => <strong className="text-emerald-300 font-bold" {...props} />,
+                                    em: ({ ...props }) => <em className="text-emerald-200 italic" {...props} />,
+                                    a: ({ ...props }) => <a className="text-emerald-400 hover:text-emerald-300 underline" {...props} />,
+                                    ul: ({ ...props }) => <ul className="list-disc list-inside mb-3 space-y-1 text-gray-300" {...props} />,
+                                    ol: ({ ...props }) => <ol className="list-decimal list-inside mb-3 space-y-1 text-gray-300" {...props} />,
+                                    li: ({ ...props }) => <li className="text-gray-300" {...props} />,
+                                    blockquote: ({ ...props }) => (
+                                        <blockquote className="border-l-4 border-emerald-500 pl-4 italic text-emerald-200 my-4 py-2 bg-emerald-500/5 rounded-r" {...props} />
+                                    ),
+                                    code: ({ className, children, ...props }) => {
+                                        const isInline = !className?.includes('language-');
+                                        return isInline
+                                            ? <code className="bg-gray-700 text-emerald-300 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>{children}</code>
+                                            : <code className="block bg-gray-900 text-emerald-300 p-4 rounded my-3 overflow-x-auto font-mono text-sm" {...props}>{children}</code>;
+                                    },
+                                    hr: ({ ...props }) => <hr className="border-gray-600 my-6" {...props} />,
+                                    table: ({ ...props }) => (
+                                        <div className="overflow-x-auto my-4">
+                                            <table className="min-w-full border border-gray-600 rounded" {...props} />
+                                        </div>
+                                    ),
+                                    thead: ({ ...props }) => <thead className="bg-gray-700" {...props} />,
+                                    th: ({ ...props }) => <th className="border border-gray-600 px-4 py-2 text-emerald-400 font-semibold" {...props} />,
+                                    td: ({ ...props }) => <td className="border border-gray-600 px-4 py-2 text-gray-300" {...props} />,
+                                }}
+                            >
+                                {currentPage.content}
+                            </ReactMarkdown>
                         </div>
                     </div>
 

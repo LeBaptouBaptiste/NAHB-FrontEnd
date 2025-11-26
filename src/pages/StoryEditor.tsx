@@ -248,93 +248,96 @@ export function StoryEditor() {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <div className="border-b border-border/50 px-6 py-4 bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
-              onClick={() => navigate("/my-stories")}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
+        <div className="container mx-auto">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                onClick={() => navigate("/my-stories")}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
 
-            <div className="h-6 w-px bg-border" />
+              <div className="h-6 w-px bg-border hidden lg:block" />
 
-            <Input
-              value={story.title}
-              onChange={(e) => updateStoryTitle(e.target.value)}
-              className="bg-transparent border-none text-lg font-semibold focus-visible:ring-0 px-2 w-[300px]"
-            />
+              <Input
+                value={story.title}
+                onChange={(e) => updateStoryTitle(e.target.value)}
+                className="bg-transparent border-none text-lg font-semibold focus-visible:ring-0 px-2 w-full lg:w-[300px]"
+                placeholder="Story Title"
+              />
 
-            {/* Story Cover Image Upload */}
-            <div className="relative">
-              {story.imageUrl ? (
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border/50">
-                  <img
-                    src={story.imageUrl}
-                    alt="Story cover"
-                    className="w-full h-full object-cover"
-                  />
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-0 right-0 h-4 w-4"
-                    onClick={async () => {
-                      if (story) {
-                        setStory({ ...story, imageUrl: undefined });
-                        await storyService.updateStory(story._id, { imageUrl: undefined });
-                      }
-                    }}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              ) : (
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleStoryImageUpload}
-                    disabled={saving}
-                  />
-                  <div className="w-16 h-16 rounded-lg border-2 border-dashed border-border/50 flex items-center justify-center hover:border-primary/50 transition-colors">
-                    <Upload className="w-5 h-5 text-muted-foreground" />
+              {/* Story Cover Image Upload */}
+              <div className="relative">
+                {story.imageUrl ? (
+                  <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border/50">
+                    <img
+                      src={story.imageUrl}
+                      alt="Story cover"
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-0 right-0 h-4 w-4"
+                      onClick={async () => {
+                        if (story) {
+                          setStory({ ...story, imageUrl: undefined });
+                          await storyService.updateStory(story._id, { imageUrl: undefined });
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
-                </label>
-              )}
+                ) : (
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleStoryImageUpload}
+                      disabled={saving}
+                    />
+                    <div className="w-16 h-16 rounded-lg border-2 border-dashed border-border/50 flex items-center justify-center hover:border-primary/50 transition-colors">
+                      <Upload className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                  </label>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
-              onClick={() => navigate(`/editor/${id}/flow`)}
-            >
-              <GitBranch className="w-4 h-4 mr-2" />
-              Flow View
-            </Button>
-            <Button
-              size="sm"
-              className="gap-2 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all"
-              onClick={saveCurrentPage}
-              disabled={saving}
-            >
-              <Save className="w-4 h-4" />
-              {saving ? "Saving..." : "Save Page"}
-            </Button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all flex-1 lg:flex-none"
+                onClick={() => navigate(`/editor/${id}/flow`)}
+              >
+                <GitBranch className="w-4 h-4 mr-2" />
+                Flow View
+              </Button>
+              <Button
+                size="sm"
+                className="gap-2 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all flex-1 lg:flex-none"
+                onClick={saveCurrentPage}
+                disabled={saving}
+              >
+                <Save className="w-4 h-4" />
+                {saving ? "Saving..." : "Save Page"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Editor */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Page List Sidebar */}
-        <div className="w-64 border-r border-border/50 bg-card/30 flex flex-col">
+        <div className="lg:w-64 border-b lg:border-b-0 lg:border-r border-border/50 bg-card/30 flex flex-col">
           <div className="p-4 border-b border-border/50">
             <Button
               size="sm"
