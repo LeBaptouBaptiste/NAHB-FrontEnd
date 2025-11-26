@@ -195,7 +195,7 @@ export interface Rating {
     _id: string;
     storyId: string;
     userId: string;
-    score: number;
+    value: number;
     comment?: string;
     createdAt: string;
     updatedAt: string;

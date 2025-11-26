@@ -83,7 +83,7 @@ export function StoryDetails() {
         const mine = await ratingService.getMyRating(storyId);
         setMyRating(mine);
         if (mine) {
-          setUserScore(mine.score);
+          setUserScore(mine.value);
           setUserComment(mine.comment || "");
         }
       } catch (error) {
@@ -310,11 +310,10 @@ export function StoryDetails() {
                             className="focus:outline-none"
                           >
                             <Star
-                              className={`w-6 h-6 ${
-                                value <= userScore
-                                  ? "text-yellow-500 fill-yellow-500"
-                                  : "text-muted-foreground"
-                              }`}
+                              className={`w-6 h-6 ${value <= userScore
+                                ? "text-yellow-500 fill-yellow-500"
+                                : "text-muted-foreground"
+                                }`}
                             />
                           </button>
                         ))}
@@ -366,11 +365,10 @@ export function StoryDetails() {
                             {[1, 2, 3, 4, 5].map((value) => (
                               <Star
                                 key={value}
-                                className={`w-3 h-3 ${
-                                  value <= rating.score
-                                    ? "text-yellow-500 fill-yellow-500"
-                                    : "text-muted-foreground"
-                                }`}
+                                className={`w-3 h-3 ${value <= rating.value
+                                  ? "text-yellow-500 fill-yellow-500"
+                                  : "text-muted-foreground"
+                                  }`}
                               />
                             ))}
                           </div>
@@ -391,43 +389,55 @@ export function StoryDetails() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <Button
-              size="lg"
-              className="w-full gap-2"
-              onClick={handleStartGame}
-            >
-              <PlayCircle className="w-5 h-5" />
-              Start Adventure
-            </Button>
+            {/* Start Adventure Card */}
+            <Card className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 border-2 border-emerald-500/40 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="pt-8 pb-8 px-6 space-y-4">
+                <div className="text-2xl font-bold text-center bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                  Ready to embark?
+                </div>
+                <p className="text-sm text-center text-muted-foreground">
+                  Your choices shape the destiny
+                </p>
+                <Button
+                  size="lg"
+                  className="w-full gap-2 h-14 text-lg font-semibold bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                  onClick={handleStartGame}
+                >
+                  <PlayCircle className="w-6 h-6" />
+                  Start Your Adventure
+                </Button>
+              </CardContent>
+            </Card>
 
-            {/* Report story */}
+            {/* Report Story Button */}
             <Button
               variant="outline"
               size="sm"
-              className="w-full gap-2"
+              className="w-full gap-2 border-red-500/50 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-600 dark:hover:bg-red-950/20 transition-all cursor-pointer"
               onClick={() => setReportDialogOpen(true)}
             >
               <Flag className="w-4 h-4" />
               Report Story
             </Button>
 
-            <Card>
+            {/* Story Stats Card */}
+            <Card className="border-border/50 hover:border-border transition-colors">
               <CardHeader>
-                <CardTitle>Story Stats</CardTitle>
+                <CardTitle className="text-lg">Story Stats</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-muted-foreground">Completion Rate</span>
-                    <span>
+                    <span className="font-medium">
                       {story.stats?.views > 0
                         ? Math.round(((story.stats?.completions || 0) / story.stats.views) * 100)
                         : 0}%
                     </span>
                   </div>
-                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="w-full h-2.5 bg-muted/50 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-primary to-secondary"
+                      className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-full transition-all duration-500"
                       style={{ width: `${story.stats?.views > 0 ? Math.round(((story.stats?.completions || 0) / story.stats.views) * 100) : 0}%` }}
                     />
                   </div>
@@ -435,20 +445,21 @@ export function StoryDetails() {
               </CardContent>
             </Card>
 
-            <Card>
+            {/* About the Author Card */}
+            <Card className="border-border/50 hover:border-border transition-colors">
               <CardHeader>
-                <CardTitle>About the Author</CardTitle>
+                <CardTitle className="text-lg">About the Author</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center text-white font-semibold shadow-md">
                     <span>AU</span>
                   </div>
                   <div>
                     <div className="text-sm font-medium">Author {story.authorId.substring(0, 6)}</div>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full" disabled>
+                <Button variant="outline" className="w-full cursor-not-allowed opacity-60" disabled>
                   View Profile
                 </Button>
               </CardContent>

@@ -6,7 +6,7 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
-import { storyService } from "../api/services";
+import { storyService, ratingService } from "../api/services";
 import type { Story } from "../api/services";
 
 const allTags = ["Fantasy", "Sci-Fi", "Mystery", "Horror", "Adventure", "Romance", "Thriller", "Cyberpunk", "Magic", "Space"];
@@ -17,6 +17,7 @@ export function StoryListing() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ratings, setRatings] = useState<Record<string, number>>({});
 
   useEffect(() => {
     loadStories();
@@ -27,6 +28,9 @@ export function StoryListing() {
       setLoading(true);
       const data = await storyService.getPublishedStories(searchQuery);
       setStories(data);
+
+      // Fetch ratings for all stories
+      await loadRatings(data);
     } catch (error) {
       console.error("Failed to load published stories:", error);
     } finally {
@@ -34,24 +38,43 @@ export function StoryListing() {
     }
   };
 
+  const loadRatings = async (storyList: Story[]) => {
+    const ratingsMap: Record<string, number> = {};
+
+    // Fetch ratings in parallel for better performance
+    await Promise.all(
+      storyList.map(async (story) => {
+        try {
+          const data = await ratingService.getStoryRatings(story._id, 1, 1);
+          ratingsMap[story._id] = data.stats.averageScore || 0;
+        } catch (error) {
+          console.error(`Failed to load ratings for story ${story._id}:`, error);
+          ratingsMap[story._id] = 0;
+        }
+      })
+    );
+
+    setRatings(ratingsMap);
+  };
+
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
+    setSelectedTags(prev =>
+      prev.includes(tag)
         ? prev.filter(t => t !== tag)
         : [...prev, tag]
     );
   };
 
   const filteredStories = stories.filter(story => {
-    const matchesTags = selectedTags.length === 0 || 
-                       selectedTags.some(tag => story.tags.includes(tag));
+    const matchesTags = selectedTags.length === 0 ||
+      selectedTags.some(tag => story.tags.includes(tag));
     return matchesTags;
   });
 
   return (
     <div className="min-h-screen">
       <Navigation />
-      
+
       <main className="container mx-auto px-6 py-12">
         <div className="mb-8">
           <h1 className="mb-2">Discover Stories</h1>
@@ -69,10 +92,10 @@ export function StoryListing() {
                 placeholder="Search stories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-input border-border/50"
+                className="pl-10 bg-card border-border/50 hover:border-border focus:border-emerald-500 transition-colors"
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-500 dark:hover:bg-emerald-950/20 transition-colors cursor-pointer">
               <SlidersHorizontal className="w-4 h-4" />
               Filters
             </Button>
@@ -84,7 +107,10 @@ export function StoryListing() {
               <Badge
                 key={tag}
                 variant={selectedTags.includes(tag) ? "default" : "outline"}
-                className="cursor-pointer hover:bg-primary/20 transition-colors"
+                className={`cursor-pointer transition-all ${selectedTags.includes(tag)
+                    ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white border-transparent hover:from-emerald-700 hover:to-green-700 shadow-md'
+                    : 'hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-500 dark:hover:bg-emerald-950/20'
+                  }`}
                 onClick={() => toggleTag(tag)}
               >
                 {tag}
@@ -95,27 +121,26 @@ export function StoryListing() {
 
         {/* Story Grid */}
         {loading ? (
-            <div className="flex justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
         ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredStories.map(story => (
-                // StoryCard props might need adjustment if interfaces mismatch
-                <StoryCard
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredStories.map(story => (
+              <StoryCard
                 key={story._id}
                 id={story._id}
                 title={story.title}
                 description={story.description}
                 tags={story.tags}
-                rating={4.5} // Mock rating
+                rating={ratings[story._id] || 0}
                 plays={story.stats?.views || 0}
-                author={story.authorId} // Should ideally fetch author name
+                author={story.authorId}
                 imageUrl={story.imageUrl || "https://images.unsplash.com/photo-1534447677768-be436bb09401?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYW50YXN5JTIwbGFuZHNjYXBlfGVufDF8fHx8MTc2Mzk5NjkzMXww&ixlib=rb-4.1.0&q=80&w=1080"}
                 onClick={() => navigate(`/story/${story._id}`)}
-                />
-          ))}
-        </div>
+              />
+            ))}
+          </div>
         )}
 
         {!loading && filteredStories.length === 0 && (
