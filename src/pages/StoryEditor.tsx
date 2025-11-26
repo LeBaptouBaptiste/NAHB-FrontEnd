@@ -574,10 +574,27 @@ export function StoryEditor() {
 
                       <TabsContent value="hotspots">
                         <HotspotCreator
+                          key={selectedPage._id}
                           imageUrl={selectedPage.image || ''}
                           initialHotspots={selectedPage.hotspots || []}
                           availablePages={pages.map((p, index) => ({ id: p._id, title: `Page ${index + 1}` }))}
-                          onSave={(hotspots) => updatePageLocal(selectedPage._id, { hotspots })}
+                          onSave={async (hotspots) => {
+                            console.log("Saving hotspots:", hotspots);
+                            updatePageLocal(selectedPage._id, { hotspots });
+                            // Immediately save to backend
+                            try {
+                              setSaving(true);
+                              console.log("Sending update to backend for page:", selectedPage._id);
+                              await pageService.updatePage(selectedPage._id, { ...selectedPage, hotspots });
+                              console.log("Backend save successful");
+                              toast.success("Zones saved successfully!");
+                            } catch (error) {
+                              console.error("Failed to save zones:", error);
+                              toast.error("Failed to save zones");
+                            } finally {
+                              setSaving(false);
+                            }
+                          }}
                         />
                       </TabsContent>
                     </Tabs>

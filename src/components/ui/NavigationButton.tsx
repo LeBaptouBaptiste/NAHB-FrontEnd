@@ -18,7 +18,7 @@ export function NavButton({ to, icon, children }: NavButtonProps) {
         size="sm"
         className={(
           isActive
-            ? "text-fuchsia-600"
+            ? "text-white"
             : "text-muted-foreground hover:text-foreground hover:cursor-pointer"
         )}
       >

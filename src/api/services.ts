@@ -125,8 +125,8 @@ export const gameService = {
         const response = await api.get<GameSession>(`/game/session/${sessionId}`);
         return response.data;
     },
-    makeChoice: async (sessionId: string, choiceIndex: number) => {
-        const response = await api.post<GameSession>('/game/choice', { sessionId, choiceIndex });
+    makeChoice: async (sessionId: string, choiceIndex?: number, hotspotIndex?: number) => {
+        const response = await api.post<GameSession>('/game/choice', { sessionId, choiceIndex, hotspotIndex });
         return response.data;
     },
     getUserSessions: async () => {
