@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import type { ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -13,7 +14,9 @@ import {
   GitBranch,
   Sparkles,
   Upload,
-  Dices
+  Dices,
+  Music,
+  Volume2
 } from "lucide-react";
 import {
   Select,
@@ -304,7 +307,7 @@ export function StoryEditor() {
 
               <Input
                 value={story.title}
-                onChange={(e) => updateStoryTitle(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => updateStoryTitle(e.target.value)}
                 className="bg-transparent border-none text-lg font-semibold focus-visible:ring-0 px-2 w-full lg:w-[300px]"
                 placeholder="Story Title"
               />
@@ -424,7 +427,7 @@ export function StoryEditor() {
                   <CardContent>
                     <Input
                       value={story.title}
-                      onChange={(e) => updateStoryTitle(e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => updateStoryTitle(e.target.value)}
                       className="bg-card/50 border-white/10 focus:border-emerald-500/50 text-lg font-semibold"
                       placeholder="Enter story title..."
                     />
@@ -439,7 +442,7 @@ export function StoryEditor() {
                   <CardContent>
                     <Textarea
                       value={story.description}
-                      onChange={(e) => updateStoryDescription(e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateStoryDescription(e.target.value)}
                       className="bg-card/50 border-white/10 focus:border-emerald-500/50 min-h-[120px]"
                       placeholder="Write a compelling description for your story..."
                     />
@@ -503,12 +506,12 @@ export function StoryEditor() {
                   <CardContent>
                     <Input
                       value={story.tags.join(", ")}
-                      onChange={(e) => {
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
                         // Just update the display value, don't parse yet
                         const displayValue = e.target.value;
-                        setStory({ ...story, tags: displayValue.includes(',') ? displayValue.split(',').map(t => t.trim()) : [displayValue] });
+                        setStory({ ...story, tags: displayValue.includes(',') ? displayValue.split(',').map((t: string) => t.trim()) : [displayValue] });
                       }}
-                      onBlur={(e) => updateStoryTags(e.target.value)}
+                      onBlur={(e: ChangeEvent<HTMLInputElement>) => updateStoryTags(e.target.value)}
                       placeholder="Fantasy, Adventure, Magic..."
                       className="bg-card/50 border-white/10 focus:border-emerald-500/50"
                     />
@@ -532,7 +535,7 @@ export function StoryEditor() {
                   <Textarea
                     id="page-text"
                     value={selectedPage.content}
-                    onChange={(e) => updatePageLocal(selectedPage._id, { content: e.target.value })}
+                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updatePageLocal(selectedPage._id, { content: e.target.value })}
                     className="bg-input border-border/50 min-h-[200px]"
                     placeholder="Write your story content here..."
                   />
@@ -717,7 +720,7 @@ export function StoryEditor() {
                             <Label>Choice Text</Label>
                             <Input
                               value={choice.text}
-                              onChange={(e) => updateChoice(index, { text: e.target.value })}
+                              onChange={(e: ChangeEvent<HTMLInputElement>) => updateChoice(index, { text: e.target.value })}
                               className="bg-input border-border/50"
                               placeholder="What the reader sees..."
                             />
@@ -774,8 +777,6 @@ export function StoryEditor() {
                                         if (value !== "custom") {
                                           updateChoice(index, { condition: { ...choice.condition!, value } });
                                         } else {
-                                          // If switching to custom, keep current value if it's not in list, or clear it?
-                                          // Let's clear it to avoid confusion or keep it if it's already custom.
                                           if (availableItems.includes(choice.condition!.value)) {
                                             updateChoice(index, { condition: { ...choice.condition!, value: "" } });
                                           }
@@ -794,12 +795,11 @@ export function StoryEditor() {
                                     </Select>
                                   ) : null}
 
-                                  {/* Show input if no items available OR user selected "custom" (or value is not in list) */}
                                   {(availableItems.length === 0 || !availableItems.includes(choice.condition.value)) && (
                                     <Input
                                       value={choice.condition.value}
-                                      onChange={(e) => updateChoice(index, { condition: { ...choice.condition!, value: e.target.value } })}
-                                      placeholder="Item name"
+                                      onChange={(e: ChangeEvent<HTMLInputElement>) => updateChoice(index, { condition: { ...choice.condition!, value: e.target.value } })}
+                                      placeholder="Item name required"
                                       className="flex-1 bg-input border-border/50"
                                     />
                                   )}
@@ -807,8 +807,6 @@ export function StoryEditor() {
                               )}
                             </div>
                           </div>
-
-
 
                           {/* Rewards Section */}
                           <div className="space-y-2">
@@ -836,11 +834,141 @@ export function StoryEditor() {
                               {choice.rewards?.[0]?.type === "add_item" && (
                                 <Input
                                   value={choice.rewards[0].value}
-                                  onChange={(e) => updateChoice(index, { rewards: [{ type: "add_item", value: e.target.value }] })}
+                                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateChoice(index, { rewards: [{ type: "add_item", value: e.target.value }] })}
                                   placeholder="Item name to give"
                                   className="flex-1 bg-input border-border/50"
                                 />
                               )}
+                            </div>
+                          </div>
+
+                          {/* Audio Section */}
+                          <div className="space-y-2">
+                            <Label>Audio Trigger (Optional)</Label>
+                            <div className="space-y-2">
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 gap-2"
+                                  onClick={() => document.getElementById(`music-upload-${index}`)?.click()}
+                                >
+                                  <Music className="w-4 h-4" />
+                                  Add Music
+                                </Button>
+                                <Input
+                                  id={`music-upload-${index}`}
+                                  type="file"
+                                  accept="audio/*"
+                                  className="hidden"
+                                  onChange={async (e: ChangeEvent<HTMLInputElement>) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    try {
+                                      const { url } = await uploadService.uploadAudio(file);
+                                      const newAudio = [...(choice.audio || [])];
+                                      newAudio.push({
+                                        src: url,
+                                        type: 'music',
+                                        loop: true,
+                                        duration: undefined
+                                      });
+                                      updateChoice(index, { audio: newAudio });
+                                    } catch (error) {
+                                      toast.error("Failed to upload music");
+                                    }
+                                    e.target.value = '';
+                                  }}
+                                />
+
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 gap-2"
+                                  onClick={() => document.getElementById(`sfx-upload-${index}`)?.click()}
+                                >
+                                  <Volume2 className="w-4 h-4" />
+                                  Add SFX
+                                </Button>
+                                <Input
+                                  id={`sfx-upload-${index}`}
+                                  type="file"
+                                  accept="audio/*"
+                                  className="hidden"
+                                  onChange={async (e: ChangeEvent<HTMLInputElement>) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    try {
+                                      const { url } = await uploadService.uploadAudio(file);
+                                      const newAudio = [...(choice.audio || [])];
+                                      newAudio.push({
+                                        src: url,
+                                        type: 'sfx',
+                                        loop: false,
+                                        duration: undefined
+                                      });
+                                      updateChoice(index, { audio: newAudio });
+                                    } catch (error) {
+                                      toast.error("Failed to upload SFX");
+                                    }
+                                    e.target.value = '';
+                                  }}
+                                />
+                              </div>
+
+                              {choice.audio?.map((track, trackIndex) => (
+                                <div key={trackIndex} className="space-y-2 p-3 border border-border/50 rounded bg-card/30">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      {track.type === 'music' ? <Music className="w-4 h-4 text-primary" /> : <Volume2 className="w-4 h-4 text-orange-400" />}
+                                      <span className="text-sm font-medium truncate max-w-[150px]">{track.src.split('/').pop()}</span>
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        const newAudio = [...(choice.audio || [])];
+                                        newAudio.splice(trackIndex, 1);
+                                        updateChoice(index, { audio: newAudio });
+                                      }}
+                                    >
+                                      <Trash2 className="w-3 h-3 text-destructive" />
+                                    </Button>
+                                  </div>
+
+                                  <div className="flex gap-2 items-center">
+                                    <div className="flex-1">
+                                      <Label className="text-xs mb-1 block">Duration (s)</Label>
+                                      <Input
+                                        type="number"
+                                        placeholder="Auto"
+                                        className="h-8 text-xs"
+                                        value={track.duration || ''}
+                                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                          const newAudio = [...choice.audio!];
+                                          newAudio[trackIndex].duration = e.target.value ? Number(e.target.value) : undefined;
+                                          updateChoice(index, { audio: newAudio });
+                                        }}
+                                      />
+                                    </div>
+                                    {track.type === 'music' && (
+                                      <div className="flex items-center gap-2 pt-4">
+                                        <Label className="text-xs cursor-pointer" htmlFor={`loop-${index}-${trackIndex}`}>Loop</Label>
+                                        <input
+                                          id={`loop-${index}-${trackIndex}`}
+                                          type="checkbox"
+                                          checked={track.loop}
+                                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                            const newAudio = [...choice.audio!];
+                                            newAudio[trackIndex].loop = e.target.checked;
+                                            updateChoice(index, { audio: newAudio });
+                                          }}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </div>
 
@@ -851,24 +979,11 @@ export function StoryEditor() {
                                 <Dices className="w-4 h-4 text-emerald-500" />
                                 <Label className="cursor-pointer">Dice Roll Challenge</Label>
                               </div>
-                              {choice.diceRoll?.enabled ? (
+                              {!choice.diceRoll?.enabled && (
                                 <Button
+                                  variant="ghost"
                                   size="sm"
-                                  variant="destructive"
-                                  onClick={() => {
-                                    const currentDiceRoll = choice.diceRoll || { enabled: false, difficulty: 15, type: 'combat' as const };
-                                    updateChoice(index, {
-                                      diceRoll: { ...currentDiceRoll, enabled: false }
-                                    });
-                                  }}
-                                >
-                                  Remove Challenge
-                                </Button>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="border-emerald-500/50 text-emerald-500 hover:bg-emerald-500/10"
+                                  className="text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10"
                                   onClick={() => {
                                     const currentDiceRoll = choice.diceRoll || { enabled: false, difficulty: 15, type: 'combat' as const };
                                     updateChoice(index, {
@@ -892,7 +1007,7 @@ export function StoryEditor() {
                                       min={5}
                                       max={30}
                                       value={choice.diceRoll?.difficulty || 15}
-                                      onChange={(e) => {
+                                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
                                         const currentDiceRoll = choice.diceRoll || { enabled: true, difficulty: 15, type: 'combat' as const };
                                         updateChoice(index, {
                                           diceRoll: { ...currentDiceRoll, difficulty: parseInt(e.target.value) }
