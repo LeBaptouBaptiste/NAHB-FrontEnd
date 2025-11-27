@@ -40,6 +40,12 @@ export interface Page {
             difficulty?: number; // DC (Difficulty Class)
             type?: 'combat' | 'stealth' | 'persuasion' | 'custom';
         };
+        audio?: {
+            src: string;
+            type: 'music' | 'sfx';
+            duration?: number;
+            loop?: boolean;
+        }[];
     }[];
     isEnding: boolean;
     endingType?: 'success' | 'failure' | 'neutral';
@@ -216,6 +222,16 @@ export const uploadService = {
         const formData = new FormData();
         formData.append('image', file);
         const response = await api.post<{ url: string }>('/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+    uploadAudio: async (file: File) => {
+        const formData = new FormData();
+        formData.append('audio', file);
+        const response = await api.post<{ url: string }>('/upload/audio', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
