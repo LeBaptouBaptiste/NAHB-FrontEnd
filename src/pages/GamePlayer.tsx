@@ -89,11 +89,26 @@ const GamePlayer = () => {
     const handleChoice = async (choiceIndex: number, choiceText: string) => {
         if (!session || !currentPage) return;
 
+        const choice = currentPage.choices[choiceIndex];
+
+        // Check if this is a dice roll choice
+        // Priority 1: Structured diceRoll data
+        if (choice.diceRoll?.enabled) {
+            setPendingChoice(choiceIndex);
+            setDiceConfig({
+                difficulty: choice.diceRoll.difficulty || 15,
+                type: choice.diceRoll.type || 'combat'
+            });
+            setShowDiceRoll(true);
+            return;
+        }
+
+        // Priority 2: Legacy text parsing (backward compatibility)
         // Check if this is a dice roll choice (but not an outcome choice like "≥18")
         const isOutcomeChoice = choiceText.match(/^[[<≥\d]/); // Starts with [, <, ≥, or digit
-        const isDiceRoll = (choiceText.includes('1d20') || choiceText.includes('[COMBAT') || choiceText.includes('[FUITE')) && !isOutcomeChoice;
+        const isLegacyDiceRoll = (choiceText.includes('1d20') || choiceText.includes('[COMBAT') || choiceText.includes('[FUITE')) && !isOutcomeChoice;
 
-        if (isDiceRoll) {
+        if (isLegacyDiceRoll) {
             // Extract difficulty from choice text (e.g., "≥15" or "≥12")
             const difficultyMatch = choiceText.match(/≥(\d+)/);
             const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 15;
@@ -136,53 +151,29 @@ const GamePlayer = () => {
             return;
         }
 
-        // Find the appropriate outcome choice based on dice roll result
-        // Look for choices with difficulty numbers like "[≥18]", "[14-17]", "[<14]"
-        const outcomeChoices = currentPage.choices.map((choice, idx) => ({
-            index: idx,
-            text: choice.text,
-            minMatch: choice.text.match(/≥(\d+)/),
-            rangeMatch: choice.text.match(/(\d+)-(\d+)/),
-            maxMatch: choice.text.match(/<(\d+)/),
-        }));
+        // Determine success based on difficulty
+        // We need to find the difficulty from the pending choice
+        const choice = currentPage.choices[pendingChoice ?? 0];
+        const difficulty = choice?.diceRoll?.difficulty || 15;
+        const isSuccess = total >= difficulty;
 
-        // Find matching outcome based on total roll
-        let selectedOutcomeIndex = pendingChoice ?? 0; // Default to original choice or 0
+        console.log('Dice Result Debug:', {
+            pendingChoice,
+            choice,
+            difficulty,
+            total,
+            isSuccess,
+            diceRollConfig: choice?.diceRoll
+        });
 
-        for (const outcome of outcomeChoices) {
-            // Check for ≥X pattern (success threshold)
-            if (outcome.minMatch) {
-                const threshold = parseInt(outcome.minMatch[1]);
-                if (total >= threshold) {
-                    selectedOutcomeIndex = outcome.index;
-                    break;
-                }
-            }
-            // Check for X-Y range pattern
-            else if (outcome.rangeMatch) {
-                const min = parseInt(outcome.rangeMatch[1]);
-                const max = parseInt(outcome.rangeMatch[2]);
-                if (total >= min && total <= max) {
-                    selectedOutcomeIndex = outcome.index;
-                    break;
-                }
-            }
-            // Check for <X pattern (failure threshold)
-            else if (outcome.maxMatch) {
-                const threshold = parseInt(outcome.maxMatch[1]);
-                if (total < threshold) {
-                    selectedOutcomeIndex = outcome.index;
-                    break;
-                }
-            }
-        }
+        // Pass the success status to the backend
+        await makeChoice(pendingChoice ?? 0, undefined, isSuccess);
 
-        await makeChoice(selectedOutcomeIndex);
         setPendingChoice(null);
         setDiceConfig(null);
     };
 
-    const makeChoice = async (choiceIndex: number, hotspotIndex?: number) => {
+    const makeChoice = async (choiceIndex: number, hotspotIndex?: number, diceRollSuccess?: boolean) => {
         if (!session || !currentPage) return;
 
         try {
@@ -262,7 +253,7 @@ const GamePlayer = () => {
                 }
             }
 
-            const response = await gameService.makeChoice(session._id, choiceIndex, hotspotIndex);
+            const response = await gameService.makeChoice(session._id, choiceIndex, hotspotIndex, diceRollSuccess);
 
             setSession(response);
             if (response.inventory) {

@@ -39,6 +39,8 @@ export interface Page {
             enabled: boolean;
             difficulty?: number; // DC (Difficulty Class)
             type?: 'combat' | 'stealth' | 'persuasion' | 'custom';
+            failurePageId?: string;
+            successPageId?: string;
         };
         audio?: {
             src: string;
@@ -141,8 +143,8 @@ export const gameService = {
         const response = await api.get<GameSession>(`/game/session/${sessionId}`);
         return response.data;
     },
-    makeChoice: async (sessionId: string, choiceIndex?: number, hotspotIndex?: number) => {
-        const response = await api.post<GameSession>('/game/choice', { sessionId, choiceIndex, hotspotIndex });
+    makeChoice: async (sessionId: string, choiceIndex?: number, hotspotIndex?: number, diceRollSuccess?: boolean) => {
+        const response = await api.post<GameSession>('/game/choice', { sessionId, choiceIndex, hotspotIndex, diceRollSuccess });
         return response.data;
     },
     getUserSessions: async () => {

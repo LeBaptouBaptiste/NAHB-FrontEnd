@@ -1038,8 +1038,62 @@ export function StoryEditor() {
                                       </SelectContent>
                                     </Select>
                                   </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`success-page-${index}`} className="text-sm">Success Page (Optional)</Label>
+                                    <Select
+                                      value={choice.diceRoll?.successPageId || 'none'}
+                                      onValueChange={(value) => {
+                                        const currentDiceRoll = choice.diceRoll || { enabled: true, difficulty: 15, type: 'combat' as const };
+                                        updateChoice(index, {
+                                          diceRoll: {
+                                            ...currentDiceRoll,
+                                            successPageId: value === 'none' ? undefined : value
+                                          }
+                                        });
+                                      }}
+                                    >
+                                      <SelectTrigger id={`success-page-${index}`} className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors">
+                                        <SelectValue placeholder="Select a page..." />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="none">None (Use Target Page)</SelectItem>
+                                        {pages.filter(p => p._id !== selectedPage._id).map(page => (
+                                          <SelectItem key={page._id} value={page._id}>
+                                            Page {pages.findIndex(p => p._id === page._id) + 1} - {page.content.substring(0, 20)}...
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`failure-page-${index}`} className="text-sm">Failure Page (Optional)</Label>
+                                    <Select
+                                      value={choice.diceRoll?.failurePageId || 'none'}
+                                      onValueChange={(value) => {
+                                        const currentDiceRoll = choice.diceRoll || { enabled: true, difficulty: 15, type: 'combat' as const };
+                                        updateChoice(index, {
+                                          diceRoll: {
+                                            ...currentDiceRoll,
+                                            failurePageId: value === 'none' ? undefined : value
+                                          }
+                                        });
+                                      }}
+                                    >
+                                      <SelectTrigger id={`failure-page-${index}`} className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors">
+                                        <SelectValue placeholder="Select a page..." />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="none">None (Stay on page)</SelectItem>
+                                        {pages.filter(p => p._id !== selectedPage._id).map(page => (
+                                          <SelectItem key={page._id} value={page._id}>
+                                            Page {pages.findIndex(p => p._id === page._id) + 1} - {page.content.substring(0, 20)}...
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
                                 </div>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-muted-foreground mt-2">
                                   Players will roll 1d20. Success if roll ≥ {choice.diceRoll?.difficulty || 15}
                                 </p>
                               </div>
