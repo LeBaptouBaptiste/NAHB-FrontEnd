@@ -378,3 +378,22 @@ export const adminService = {
         return response.data;
     },
 };
+
+export const migrationService = {
+    exportStory: async (storyId: string) => {
+        const response = await api.get(`/migration/export/${storyId}`, {
+            responseType: 'blob'
+        });
+        return response.data;
+    },
+    importStory: async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post<{ message: string; storyId: string }>('/migration/import', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+};

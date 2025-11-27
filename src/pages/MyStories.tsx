@@ -11,7 +11,9 @@ import {
   Eye,
   GitBranch,
   MoreVertical,
-  FileText
+  FileText,
+  Upload,
+  Download
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -29,7 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
-import { storyService, ratingService } from "../api/services";
+import { storyService, ratingService, migrationService } from "../api/services";
 import type { Story } from "../api/services";
 import { toast } from "sonner";
 
@@ -76,6 +78,43 @@ export function MyStories() {
     );
 
     setRatings(ratingsMap);
+  };
+
+  const handleExport = async (storyId: string, title: string) => {
+    try {
+      const blob = await migrationService.exportStory(storyId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_export.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success("Story exported successfully!");
+    } catch (error) {
+      console.error("Failed to export story:", error);
+      toast.error("Failed to export story.");
+    }
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      try {
+        setLoading(true);
+        await migrationService.importStory(file);
+        toast.success("Story imported successfully!");
+        loadStories(); // Reload list
+      } catch (error: any) {
+        console.error("Failed to import story:", error);
+        toast.error(error.response?.data?.message || "Failed to import story.");
+      } finally {
+        setLoading(false);
+        // Reset input
+        e.target.value = '';
+      }
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -159,13 +198,27 @@ export function MyStories() {
             </p>
           </div>
 
-          <Button
-            className="gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all"
-            onClick={() => navigate("/editor/new")}
-          >
-            <Plus className="w-4 h-4" />
-            New Story
-          </Button>
+          <div className="flex gap-2">
+            <div className="relative">
+              <input
+                type="file"
+                accept=".zip"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={handleImport}
+              />
+              <Button variant="outline" className="gap-2 border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-500">
+                <Upload className="w-4 h-4" />
+                Import
+              </Button>
+            </div>
+            <Button
+              className="gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all"
+              onClick={() => navigate("/editor/new")}
+            >
+              <Plus className="w-4 h-4" />
+              New Story
+            </Button>
+          </div>
         </div>
 
         {/* Stats Overview */}
@@ -236,6 +289,10 @@ export function MyStories() {
                       <DropdownMenuItem onClick={() => navigate(`/editor/${story._id}/flow`)}>
                         <GitBranch className="w-4 h-4 mr-2" />
                         View Flow
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleExport(story._id, story.title)}>
+                        <Download className="w-4 h-4 mr-2" />
+                        Export
                       </DropdownMenuItem>
 
                       <DropdownMenuItem
