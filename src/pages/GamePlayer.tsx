@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -36,6 +36,8 @@ const GamePlayer = () => {
     const [diceConfig, setDiceConfig] = useState<{ difficulty: number; type: 'combat' | 'flee' | 'stealth' | 'persuasion' | 'custom' } | null>(null);
     const [pathStats, setPathStats] = useState<PathStats | null>(null);
     const [pathStatsLoading, setPathStatsLoading] = useState(false);
+
+    const currentMusic = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
         const loadSession = async () => {
@@ -209,14 +211,52 @@ const GamePlayer = () => {
                     choice.rewards.forEach(reward => {
                         if (reward.type === 'add_item') {
                             setInventory(prev => {
-                                // Avoid duplicates if desired, or allow them. 
-                                // For now, let's allow duplicates or check existence? 
-                                // Usually inventory is a list of strings, so duplicates are fine or we can unique them.
-                                // Let's just add it.
                                 return [...prev, reward.value];
                             });
-                            // Optional: Show a toast or message about item received
-                            // toast.success(`You received: ${reward.value}`);
+                        }
+                    });
+                }
+
+                // Handle Audio Triggers
+                if (choice.audio) {
+                    choice.audio.forEach(track => {
+                        if (!track.src) return; // Skip if no source
+
+                        if (track.type === 'music') {
+                            // Stop current music if playing
+                            if (currentMusic.current) {
+                                currentMusic.current.pause();
+                                currentMusic.current.currentTime = 0;
+                            }
+
+                            const audio = new Audio(track.src);
+                            audio.loop = track.loop || false;
+                            currentMusic.current = audio;
+
+                            audio.play().catch(e => console.error("Music playback failed:", e));
+
+                            // Handle duration for music
+                            if (track.duration) {
+                                setTimeout(() => {
+                                    if (currentMusic.current === audio) {
+                                        audio.pause();
+                                        audio.currentTime = 0;
+                                        currentMusic.current = null;
+                                    }
+                                }, track.duration * 1000);
+                            }
+                        } else {
+                            // SFX - Fire and forget
+                            const audio = new Audio(track.src);
+                            audio.play().catch(e => console.error("SFX playback failed:", e));
+
+                            // Handle duration for SFX (optional, usually SFX are short)
+                            if (track.duration) {
+                                setTimeout(() => {
+                                    audio.pause();
+                                    audio.currentTime = 0;
+                                }, track.duration * 1000);
+                            }
                         }
                     });
                 }
