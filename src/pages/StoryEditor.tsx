@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -49,6 +49,21 @@ export function StoryEditor() {
 
   // AI State
   const [generating, setGenerating] = useState(false);
+
+  // Extract all available items from story rewards
+  const availableItems = useMemo(() => {
+    const items = new Set<string>();
+    pages.forEach(p => {
+      p.choices.forEach(c => {
+        c.rewards?.forEach(r => {
+          if (r.type === 'add_item' && r.value) {
+            items.add(r.value);
+          }
+        });
+      });
+    });
+    return Array.from(items).sort();
+  }, [pages]);
 
   useEffect(() => {
     if (id && id !== 'new') {
@@ -727,6 +742,108 @@ export function StoryEditor() {
                             </Select>
                           </div>
 
+                          {/* Condition Section */}
+                          <div className="space-y-2">
+                            <Label>Condition (Optional)</Label>
+                            <div className="flex gap-2">
+                              <Select
+                                value={choice.condition?.type || "none"}
+                                onValueChange={(value) => {
+                                  if (value === "none") {
+                                    updateChoice(index, { condition: undefined });
+                                  } else {
+                                    updateChoice(index, { condition: { type: "has_item", value: choice.condition?.value || "" } });
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="w-[180px] bg-card/50 backdrop-blur-sm border-white/10">
+                                  <SelectValue placeholder="No Condition" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">No Condition</SelectItem>
+                                  <SelectItem value="has_item">Has Item</SelectItem>
+                                </SelectContent>
+                              </Select>
+
+                              {choice.condition?.type === "has_item" && (
+                                <div className="flex-1 flex gap-2">
+                                  {availableItems.length > 0 ? (
+                                    <Select
+                                      value={availableItems.includes(choice.condition.value) ? choice.condition.value : "custom"}
+                                      onValueChange={(value) => {
+                                        if (value !== "custom") {
+                                          updateChoice(index, { condition: { ...choice.condition!, value } });
+                                        } else {
+                                          // If switching to custom, keep current value if it's not in list, or clear it?
+                                          // Let's clear it to avoid confusion or keep it if it's already custom.
+                                          if (availableItems.includes(choice.condition!.value)) {
+                                            updateChoice(index, { condition: { ...choice.condition!, value: "" } });
+                                          }
+                                        }
+                                      }}
+                                    >
+                                      <SelectTrigger className="flex-1 bg-card/50 backdrop-blur-sm border-white/10">
+                                        <SelectValue placeholder="Select item" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {availableItems.map(item => (
+                                          <SelectItem key={item} value={item}>{item}</SelectItem>
+                                        ))}
+                                        <SelectItem value="custom">Custom / New Item...</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  ) : null}
+
+                                  {/* Show input if no items available OR user selected "custom" (or value is not in list) */}
+                                  {(availableItems.length === 0 || !availableItems.includes(choice.condition.value)) && (
+                                    <Input
+                                      value={choice.condition.value}
+                                      onChange={(e) => updateChoice(index, { condition: { ...choice.condition!, value: e.target.value } })}
+                                      placeholder="Item name"
+                                      className="flex-1 bg-input border-border/50"
+                                    />
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+
+
+                          {/* Rewards Section */}
+                          <div className="space-y-2">
+                            <Label>Rewards (Optional)</Label>
+                            <div className="flex gap-2">
+                              <Select
+                                value={choice.rewards?.[0]?.type || "none"}
+                                onValueChange={(value) => {
+                                  if (value === "none") {
+                                    updateChoice(index, { rewards: undefined });
+                                  } else {
+                                    updateChoice(index, { rewards: [{ type: "add_item", value: choice.rewards?.[0]?.value || "" }] });
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="w-[180px] bg-card/50 backdrop-blur-sm border-white/10">
+                                  <SelectValue placeholder="No Reward" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">No Reward</SelectItem>
+                                  <SelectItem value="add_item">Give Item</SelectItem>
+                                </SelectContent>
+                              </Select>
+
+                              {choice.rewards?.[0]?.type === "add_item" && (
+                                <Input
+                                  value={choice.rewards[0].value}
+                                  onChange={(e) => updateChoice(index, { rewards: [{ type: "add_item", value: e.target.value }] })}
+                                  placeholder="Item name to give"
+                                  className="flex-1 bg-input border-border/50"
+                                />
+                              )}
+                            </div>
+                          </div>
+
                           {/* Dice Roll Section */}
                           <div className="pt-3 border-t border-border/50 space-y-3">
                             <div className="flex items-center justify-between">
@@ -832,7 +949,7 @@ export function StoryEditor() {
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

@@ -27,6 +27,14 @@ export interface Page {
     choices: {
         text: string;
         targetPageId: string;
+        condition?: {
+            type: 'has_item';
+            value: string;
+        };
+        rewards?: {
+            type: 'add_item';
+            value: string;
+        }[];
         diceRoll?: {
             enabled: boolean;
             difficulty?: number; // DC (Difficulty Class)
@@ -113,6 +121,8 @@ export interface GameSession {
     currentPageId: string;
     history: string[];
     status: 'in_progress' | 'completed' | 'abandoned';
+    diceRolls?: number[];
+    inventory: string[];
     isPreview: boolean;
 }
 
