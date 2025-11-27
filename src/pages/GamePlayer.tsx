@@ -43,6 +43,9 @@ const GamePlayer = () => {
                 setLoading(true);
                 const sessionData = await gameService.getSession(sessionId!);
                 setSession(sessionData);
+                if (sessionData.inventory) {
+                    setInventory(sessionData.inventory);
+                }
 
                 const pageData = await pageService.getPage(sessionData.currentPageId);
                 setCurrentPage(pageData);
@@ -199,11 +202,32 @@ const GamePlayer = () => {
                     setInventory(prev => [...prev, 'superior_dagger']);
                     setStatBuffs(prev => ({ ...prev, combat: prev.combat + 2 }));
                 }
+
+                // Handle dynamic rewards
+                const choice = currentPage.choices[choiceIndex];
+                if (choice.rewards) {
+                    choice.rewards.forEach(reward => {
+                        if (reward.type === 'add_item') {
+                            setInventory(prev => {
+                                // Avoid duplicates if desired, or allow them. 
+                                // For now, let's allow duplicates or check existence? 
+                                // Usually inventory is a list of strings, so duplicates are fine or we can unique them.
+                                // Let's just add it.
+                                return [...prev, reward.value];
+                            });
+                            // Optional: Show a toast or message about item received
+                            // toast.success(`You received: ${reward.value}`);
+                        }
+                    });
+                }
             }
 
             const response = await gameService.makeChoice(session._id, choiceIndex, hotspotIndex);
 
             setSession(response);
+            if (response.inventory) {
+                setInventory(response.inventory);
+            }
 
             const pageData = await pageService.getPage(response.currentPageId);
             setCurrentPage(pageData);
@@ -432,6 +456,17 @@ const GamePlayer = () => {
 
                                     if (!matchesClass && !isClassSelectionChoice && playerClass) {
                                         return null; // Hide non-matching class choices
+                                    }
+
+                                    // Check for item conditions
+                                    if (choice.condition?.type === 'has_item') {
+                                        const requiredItem = choice.condition.value;
+                                        // Check if inventory contains the item (case insensitive or exact match depending on implementation)
+                                        // Assuming inventory stores simple strings like "potion", "key"
+                                        const hasItem = inventory.some(item => item.toLowerCase() === requiredItem.toLowerCase());
+                                        if (!hasItem) {
+                                            return null; // Hide choice if item is missing
+                                        }
                                     }
 
                                     // Clean up choice text
