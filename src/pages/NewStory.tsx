@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { storyService, pageService, aiService, uploadService } from "../api/services";
 import { Loader2, Wand2, BookOpen, Upload, Trash2 } from "lucide-react";
+import imageCompression from "browser-image-compression";
 
 export function NewStory() {
   const navigate = useNavigate();
@@ -28,19 +29,68 @@ export function NewStory() {
   const [numPages, setNumPages] = useState(5);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      try {
-        setUploadingImage(true);
-        const { url } = await uploadService.uploadImage(file);
-        setImageUrl(url);
-      } catch (error) {
-        console.error("Failed to upload image:", error);
-        setError("Failed to upload image");
-      } finally {
-        setUploadingImage(false);
-      }
+    if (!e.target.files || !e.target.files[0]) return;
+
+    const originalFile = e.target.files[0];
+
+    try {
+      setUploadingImage(true);
+
+      // 1. compression
+      const compressed = await imageCompression(originalFile, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      });
+
+      // 2. conversion en WebP
+      const webpFile = await convertToWebP(compressed);
+
+      // 3. upload
+      const { url } = await uploadService.uploadImage(webpFile);
+      setImageUrl(url);
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors de l'upload");
+    } finally {
+      setUploadingImage(false);
     }
+  };
+
+  const convertToWebP = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return reject("Canvas error");
+
+          ctx.drawImage(img, 0, 0);
+
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) return reject("WebP conversion failed");
+              const webpFile = new File([blob], file.name.replace(/\..+$/, ".webp"), {
+                type: "image/webp",
+              });
+              resolve(webpFile);
+            },
+            "image/webp",
+            0.9 // qualité WebP
+          );
+        };
+        img.src = event.target?.result as string;
+      };
+
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleManualCreate = async () => {
