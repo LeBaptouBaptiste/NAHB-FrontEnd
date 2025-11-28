@@ -39,6 +39,8 @@ export interface Page {
 			enabled: boolean;
 			difficulty?: number; // DC (Difficulty Class)
 			type?: "combat" | "stealth" | "persuasion" | "custom";
+			failurePageId?: string;
+			successPageId?: string;
 		};
 		audio?: {
 			src: string;
@@ -147,12 +149,14 @@ export const gameService = {
 	makeChoice: async (
 		sessionId: string,
 		choiceIndex?: number,
-		hotspotIndex?: number
+		hotspotIndex?: number,
+		diceRollSuccess?: boolean
 	) => {
 		const response = await api.post<GameSession>("/game/choice", {
 			sessionId,
 			choiceIndex,
 			hotspotIndex,
+			diceRollSuccess,
 		});
 		return response.data;
 	},
@@ -171,8 +175,8 @@ export const gameService = {
 		return response.data;
 	},
 	getSessionByStory: async (storyId: string) => {
-		const response = await api.get<GameSession | null>(
-			`/game/session/by-story/${storyId}`
+		const response = await api.get<GameSession>(
+			`/game/session/${storyId}/by-story`
 		);
 		return response.data;
 	},
@@ -443,6 +447,29 @@ export const adminService = {
 			status,
 			adminNotes,
 		});
+		return response.data;
+	},
+};
+
+export const migrationService = {
+	exportStory: async (storyId: string) => {
+		const response = await api.get(`/migration/export/${storyId}`, {
+			responseType: "blob",
+		});
+		return response.data;
+	},
+	importStory: async (file: File) => {
+		const formData = new FormData();
+		formData.append("file", file);
+		const response = await api.post<{ message: string; storyId: string }>(
+			"/migration/import",
+			formData,
+			{
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			}
+		);
 		return response.data;
 	},
 };

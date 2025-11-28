@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import { Card } from "../components/ui/card";
+import { Button } from "../components/atoms/button";
+import { Card } from "../components/atoms/card";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { Badge } from "../components/ui/badge";
+import { Badge } from "../components/atoms/badge";
 
 interface Page {
 	id: number;

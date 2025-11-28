@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation } from "../components/Navigation";
-import { Button } from "../components/ui/button";
+import { MainLayout } from "../components/templates/MainLayout";
+import { Button } from "../components/atoms/button";
 import {
 	Card,
 	CardContent,
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
+} from "../components/atoms/card";
+import { Badge } from "../components/atoms/badge";
 import {
 	Plus,
 	Edit,
@@ -18,13 +18,15 @@ import {
 	GitBranch,
 	MoreVertical,
 	FileText,
+	Upload,
+	Download,
 } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
+} from "../components/atoms/dropdown-menu";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -34,8 +36,8 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "../components/ui/alert-dialog";
-import { storyService, ratingService } from "../api/services";
+} from "../components/atoms/alert-dialog";
+import { storyService, ratingService, migrationService } from "../api/services";
 import type { Story } from "../api/services";
 import { toast } from "sonner";
 
@@ -85,6 +87,45 @@ export function MyStories() {
 		);
 
 		setRatings(ratingsMap);
+	};
+
+	const handleExport = async (storyId: string, title: string) => {
+		try {
+			const blob = await migrationService.exportStory(storyId);
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `${title
+				.replace(/[^a-z0-9]/gi, "_")
+				.toLowerCase()}_export.zip`;
+			document.body.appendChild(a);
+			a.click();
+			window.URL.revokeObjectURL(url);
+			document.body.removeChild(a);
+			toast.success("Story exported successfully!");
+		} catch (error) {
+			console.error("Failed to export story:", error);
+			toast.error("Failed to export story.");
+		}
+	};
+
+	const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (e.target.files && e.target.files[0]) {
+			const file = e.target.files[0];
+			try {
+				setLoading(true);
+				await migrationService.importStory(file);
+				toast.success("Story imported successfully!");
+				loadStories(); // Reload list
+			} catch (error: any) {
+				console.error("Failed to import story:", error);
+				toast.error(error.response?.data?.message || "Failed to import story.");
+			} finally {
+				setLoading(false);
+				// Reset input
+				e.target.value = "";
+			}
+		}
 	};
 
 	const handleDelete = (id: string) => {
@@ -153,10 +194,8 @@ export function MyStories() {
 	}
 
 	return (
-		<div className="min-h-screen">
-			<Navigation />
-
-			<main className="container mx-auto px-6 py-12">
+		<MainLayout>
+			<div className="container mx-auto px-4 py-8">
 				<div className="flex items-center justify-between mb-8">
 					<div>
 						<div className="flex items-center gap-3 mb-2">
@@ -172,13 +211,30 @@ export function MyStories() {
 						</p>
 					</div>
 
-					<Button
-						className="gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all"
-						onClick={() => navigate("/editor/new")}
-					>
-						<Plus className="w-4 h-4" />
-						New Story
-					</Button>
+					<div className="flex gap-2">
+						<div className="relative">
+							<input
+								type="file"
+								accept=".zip"
+								className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+								onChange={handleImport}
+							/>
+							<Button
+								variant="outline"
+								className="gap-2 border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-500"
+							>
+								<Upload className="w-4 h-4" />
+								Import
+							</Button>
+						</div>
+						<Button
+							className="gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all"
+							onClick={() => navigate("/editor/new")}
+						>
+							<Plus className="w-4 h-4" />
+							New Story
+						</Button>
+					</div>
 				</div>
 
 				{/* Stats Overview */}
@@ -271,6 +327,12 @@ export function MyStories() {
 											>
 												<GitBranch className="w-4 h-4 mr-2" />
 												View Flow
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={() => handleExport(story._id, story.title)}
+											>
+												<Download className="w-4 h-4 mr-2" />
+												Export
 											</DropdownMenuItem>
 
 											<DropdownMenuItem
@@ -377,7 +439,7 @@ export function MyStories() {
 						</CardContent>
 					</Card>
 				)}
-			</main>
+			</div>
 
 			{/* Delete Confirmation Dialog */}
 			<AlertDialog
@@ -403,6 +465,6 @@ export function MyStories() {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
-		</div>
+		</MainLayout>
 	);
 }

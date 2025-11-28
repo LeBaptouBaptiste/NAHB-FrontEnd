@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Navigation } from "../components/Navigation";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
+import { MainLayout } from "../components/templates/MainLayout";
+import { Button } from "../components/atoms/button";
+import { Badge } from "../components/atoms/badge";
 import {
 	Card,
 	CardContent,
 	CardHeader,
 	CardTitle,
-} from "../components/ui/card";
+} from "../components/atoms/card";
 import { Star, Eye, User, Trophy, PlayCircle, Flag } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import {
@@ -24,7 +24,7 @@ import type {
 	RatingsResponse,
 	ReportType,
 } from "../api/services";
-import { Textarea } from "../components/ui/textarea";
+import { Textarea } from "../components/atoms/textarea";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -34,16 +34,16 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "../components/ui/alert-dialog";
+} from "../components/atoms/alert-dialog";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../components/ui/select";
+} from "../components/atoms/select";
 import { useAuth } from "../context/AuthContext";
-import { ContinueGameModal } from "../components/ui/modal-continue-game";
+import { ContinueGameModal } from "../components/atoms/modal-continue-game";
 
 export function StoryDetails() {
 	const navigate = useNavigate();
@@ -246,10 +246,8 @@ export function StoryDetails() {
 		);
 
 	return (
-		<div className="min-h-screen">
-			<Navigation />
-
-			<main className="container mx-auto px-6 py-12">
+		<MainLayout>
+			<div className="container mx-auto px-4 py-8">
 				{/* Hero Image */}
 				<div className="relative w-full h-[400px] rounded-xl overflow-hidden mb-8">
 					<ImageWithFallback
@@ -564,7 +562,7 @@ export function StoryDetails() {
 						</Card>
 					</div>
 				</div>
-			</main>
+			</div>
 
 			{/* Report dialog */}
 			<AlertDialog
@@ -624,7 +622,6 @@ export function StoryDetails() {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
-
 			<ContinueGameModal
 				open={continueModalOpen}
 				onClose={() => setContinueModalOpen(false)}
@@ -639,6 +636,6 @@ export function StoryDetails() {
 					navigate(`/play/${session._id}`);
 				}}
 			/>
-		</div>
+		</MainLayout>
 	);
 }

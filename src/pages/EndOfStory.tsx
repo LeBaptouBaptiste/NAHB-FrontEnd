@@ -1,13 +1,13 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button } from "../components/ui/button";
+import { Button } from "../components/atoms/button";
 import {
 	Card,
 	CardContent,
 	CardHeader,
 	CardTitle,
-} from "../components/ui/card";
+} from "../components/atoms/card";
 import { Trophy, RotateCcw, List, TrendingUp } from "lucide-react";
-import { Badge } from "../components/ui/badge";
+import { Badge } from "../components/atoms/badge";
 
 export function EndOfStory() {
 	const navigate = useNavigate();

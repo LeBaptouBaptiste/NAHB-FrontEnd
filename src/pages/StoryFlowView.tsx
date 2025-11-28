@@ -19,11 +19,11 @@ import {
 	applyEdgeChanges,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import StoryNode from "../components/StoryNode";
-import { Button } from "../components/ui/button";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
-import { Switch } from "../components/ui/switch";
+import StoryNode from "../components/organisms/StoryNode";
+import { Button } from "../components/atoms/button";
+import { Label } from "../components/atoms/label";
+import { Textarea } from "../components/atoms/textarea";
+import { Switch } from "../components/atoms/switch";
 import {
 	ArrowLeft,
 	Plus,
@@ -40,10 +40,10 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../components/ui/select";
+} from "../components/atoms/select";
 import { uploadService } from "../api/services";
-import { ScrollArea } from "../components/ui/scroll-area";
-import { Alert, AlertDescription } from "../components/ui/alert";
+import { ScrollArea } from "../components/atoms/scroll-area";
+import { Alert, AlertDescription } from "../components/atoms/alert";
 
 // --- Custom Edge Component for Editable Labels ---
 const StoryEdge = ({

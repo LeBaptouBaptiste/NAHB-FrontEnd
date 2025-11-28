@@ -10,9 +10,9 @@ import {
 	Menu,
 	X,
 } from "lucide-react";
-import { Button } from "./ui/button";
-import { NavButton } from "./ui/NavigationButton";
-import { useAuth } from "../context/AuthContext";
+import { Button } from "../atoms/button";
+import { NavButton } from "../atoms/NavigationButton";
+import { useAuth } from "../../context/AuthContext";
 
 export function Navigation() {
 	const navigate = useNavigate();
