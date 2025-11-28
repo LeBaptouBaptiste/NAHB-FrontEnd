@@ -90,6 +90,14 @@ const GamePlayer = () => {
         if (!session || !currentPage) return;
 
         const choice = currentPage.choices[choiceIndex];
+        console.log('handleChoice debug:', {
+            choiceIndex,
+            choiceText,
+            choice,
+            diceRoll: choice.diceRoll,
+            hasDiceRoll: !!choice.diceRoll,
+            enabled: choice.diceRoll?.enabled
+        });
 
         // Check if this is a dice roll choice
         // Priority 1: Structured diceRoll data
@@ -445,13 +453,20 @@ const GamePlayer = () => {
                     </div>
 
                     {/* Dice Roller (in right column below content) */}
-                    {showDiceRoll && diceConfig && playerClass && (
+                    {showDiceRoll && diceConfig && (
                         <DiceRoller
                             difficulty={diceConfig.difficulty}
                             bonus={
-                                diceConfig.type === 'combat' ? (playerClass.combatBonus + statBuffs.combat) :
-                                    (diceConfig.type === 'flee' || diceConfig.type === 'stealth') ? (playerClass.fleeBonus + statBuffs.flee) :
-                                        0 // No bonus for persuasion/custom yet
+                                playerClass ? (
+                                    diceConfig.type === 'combat' ? (playerClass.combatBonus + statBuffs.combat) :
+                                        (diceConfig.type === 'flee' || diceConfig.type === 'stealth') ? (playerClass.fleeBonus + statBuffs.flee) :
+                                            0 // No bonus for persuasion/custom yet
+                                ) : (
+                                    // Default bonuses if no class selected
+                                    diceConfig.type === 'combat' ? statBuffs.combat :
+                                        (diceConfig.type === 'flee' || diceConfig.type === 'stealth') ? statBuffs.flee :
+                                            0
+                                )
                             }
                             bonusLabel={
                                 diceConfig.type === 'combat' ? 'Combat' :
