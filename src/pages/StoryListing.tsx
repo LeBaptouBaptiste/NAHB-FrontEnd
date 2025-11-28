@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation } from "../components/Navigation";
-import { StoryCard } from "../components/StoryCard";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
+import { MainLayout } from "../components/templates/MainLayout";
+import { StoryCard } from "../components/molecules/StoryCard";
+import { Input } from "../components/atoms/input";
+import { Button } from "../components/atoms/button";
+import { Badge } from "../components/atoms/badge";
 import { Search, SlidersHorizontal, Loader2, Library, Upload } from "lucide-react";
 import { storyService, ratingService, migrationService } from "../api/services";
 import type { Story } from "../api/services";
@@ -15,7 +15,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
+} from "../components/atoms/dropdown-menu";
 import { toast } from "sonner";
 
 export function StoryListing() {
@@ -127,10 +127,8 @@ export function StoryListing() {
   });
 
   return (
-    <div className="min-h-screen">
-      <Navigation />
-
-      <main className="container mx-auto px-6 py-12">
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -267,7 +265,7 @@ export function StoryListing() {
             <p className="text-muted-foreground">No stories found matching your criteria.</p>
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

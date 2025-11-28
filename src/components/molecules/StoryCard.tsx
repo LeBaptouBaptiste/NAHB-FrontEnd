@@ -1,7 +1,7 @@
 import { Star, Eye } from "lucide-react";
-import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
-import { Badge } from "./ui/badge";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { Card, CardContent, CardFooter, CardHeader } from "../atoms/card";
+import { Badge } from "../atoms/badge";
+import { ImageWithFallback } from "../figma/ImageWithFallback";
 
 interface StoryCardProps {
   id: string;

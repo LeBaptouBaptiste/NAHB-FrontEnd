@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation } from "../components/Navigation";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { MainLayout } from "../components/templates/MainLayout";
+import { Button } from "../components/atoms/button";
+import { Input } from "../components/atoms/input";
+import { Label } from "../components/atoms/label";
+import { Textarea } from "../components/atoms/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/atoms/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/atoms/tabs";
 import { storyService, pageService, aiService, uploadService } from "../api/services";
 import { Loader2, Wand2, BookOpen, Upload, Trash2 } from "lucide-react";
 
@@ -103,10 +103,8 @@ export function NewStory() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-
-      <main className="container mx-auto px-6 py-12 flex items-center justify-center min-h-[80vh]">
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[80vh]">
         <Card className="w-full max-w-2xl bg-card/60 backdrop-blur-md border-white/10 shadow-2xl">
           <CardHeader>
             <CardTitle className="text-3xl font-bold text-gradient">Create New Story</CardTitle>
@@ -297,7 +295,7 @@ export function NewStory() {
             </Tabs>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

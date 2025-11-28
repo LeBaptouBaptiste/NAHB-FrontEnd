@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation } from "../components/Navigation";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
+import { MainLayout } from "../components/templates/MainLayout";
+import { Button } from "../components/atoms/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../components/atoms/card";
+import { Badge } from "../components/atoms/badge";
 import {
   Plus,
   Edit,
@@ -20,7 +20,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
+} from "../components/atoms/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +30,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../components/ui/alert-dialog";
+} from "../components/atoms/alert-dialog";
 import { storyService, ratingService, migrationService } from "../api/services";
 import type { Story } from "../api/services";
 import { toast } from "sonner";
@@ -179,10 +179,8 @@ export function MyStories() {
   }
 
   return (
-    <div className="min-h-screen">
-      <Navigation />
-
-      <main className="container mx-auto px-6 py-12">
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -391,7 +389,7 @@ export function MyStories() {
             </CardContent>
           </Card>
         )}
-      </main>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -410,6 +408,6 @@ export function MyStories() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </MainLayout>
   );
 }

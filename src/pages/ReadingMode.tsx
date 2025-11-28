@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import { Card } from "../components/ui/card";
+import { Button } from "../components/atoms/button";
+import { Card } from "../components/atoms/card";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { Badge } from "../components/ui/badge";
+import { Badge } from "../components/atoms/badge";
 
 interface Page {
   id: number;
@@ -117,11 +117,11 @@ export function ReadingMode() {
   };
 
   const handleEndingComplete = () => {
-    navigate(`/story/${id}/ending`, { 
-      state: { 
+    navigate(`/story/${id}/ending`, {
+      state: {
         ending: currentPage.endingLabel,
-        path: pathHistory 
-      } 
+        path: pathHistory
+      }
     });
   };
 
@@ -130,15 +130,15 @@ export function ReadingMode() {
       {/* Header */}
       <div className="border-b border-border/50 px-6 py-4">
         <div className="container mx-auto flex items-center justify-between">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={() => navigate(`/story/${id}`)}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Exit Story
           </Button>
-          
+
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <BookOpen className="w-4 h-4" />
             <span>Page {pathHistory.length}</span>
@@ -152,7 +152,7 @@ export function ReadingMode() {
           <Card className="overflow-hidden">
             {currentPage.imageUrl && (
               <div className="aspect-video w-full bg-muted relative overflow-hidden">
-                <ImageWithFallback 
+                <ImageWithFallback
                   src={currentPage.imageUrl}
                   alt="Story illustration"
                   className="w-full h-full object-cover"
@@ -166,7 +166,7 @@ export function ReadingMode() {
                 )}
               </div>
             )}
-            
+
             <div className="p-8 md:p-12">
               {/* Story Text */}
               <div className="prose prose-invert max-w-none mb-8">
@@ -185,8 +185,8 @@ export function ReadingMode() {
                     </p>
                   </div>
                   <div className="flex gap-4">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="flex-1"
                       onClick={() => {
                         setCurrentPageId(1);
@@ -195,7 +195,7 @@ export function ReadingMode() {
                     >
                       Replay Story
                     </Button>
-                    <Button 
+                    <Button
                       className="flex-1"
                       onClick={handleEndingComplete}
                     >

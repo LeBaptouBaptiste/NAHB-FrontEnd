@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation } from "../components/Navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
+import { MainLayout } from "../components/templates/MainLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/atoms/card";
+import { Button } from "../components/atoms/button";
 import { Library, BookOpen, FileText, TrendingUp, Award, Star, Loader2 } from "lucide-react";
 import { userService, gameService, storyService } from "../api/services";
 import type { GameSession, Story } from "../api/services";
@@ -91,10 +91,8 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <Navigation />
-
-      <main className="container mx-auto px-6 py-12">
+    <MainLayout>
+      <div className="container mx-auto px-6 py-12">
         {/* Welcome Section */}
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-2">
@@ -206,7 +204,7 @@ export function Dashboard() {
             </Card>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

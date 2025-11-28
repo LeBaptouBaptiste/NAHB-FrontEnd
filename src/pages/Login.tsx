@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BookOpen } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/atoms/button";
+import { Input } from "../components/atoms/input";
+import { Label } from "../components/atoms/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/atoms/card";
 import { useAuth } from "../context/AuthContext";
 
 export function Login() {

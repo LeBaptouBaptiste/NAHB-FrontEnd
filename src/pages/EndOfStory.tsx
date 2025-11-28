@@ -1,8 +1,8 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/atoms/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/atoms/card";
 import { Trophy, RotateCcw, List, TrendingUp } from "lucide-react";
-import { Badge } from "../components/ui/badge";
+import { Badge } from "../components/atoms/badge";
 
 export function EndOfStory() {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export function EndOfStory() {
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
-      
+
       <div className="w-full max-w-4xl relative z-10 space-y-6">
         {/* Ending Header */}
         <div className="text-center mb-8">
@@ -62,7 +62,7 @@ export function EndOfStory() {
                   <span className="text-2xl font-semibold">{currentEndingStats.percentage}%</span>
                 </div>
                 <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className={`h-full bg-gradient-to-r ${currentEndingStats.color} transition-all duration-1000`}
                     style={{ width: `${currentEndingStats.percentage}%` }}
                   />
@@ -103,11 +103,10 @@ export function EndOfStory() {
                 {pathSteps.map((item, index) => (
                   <div key={index} className="flex gap-4">
                     <div className="flex flex-col items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        index === pathSteps.length - 1 
-                          ? `bg-gradient-to-br ${currentEndingStats.color}` 
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${index === pathSteps.length - 1
+                          ? `bg-gradient-to-br ${currentEndingStats.color}`
                           : 'bg-muted'
-                      }`}>
+                        }`}>
                         <span className="text-sm">{item.step}</span>
                       </div>
                       {index < pathSteps.length - 1 && (
@@ -130,15 +129,15 @@ export function EndOfStory() {
         <Card>
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1 gap-2"
                 onClick={() => navigate(`/read/${id}`)}
               >
                 <RotateCcw className="w-4 h-4" />
                 Replay Story
               </Button>
-              <Button 
+              <Button
                 className="flex-1"
                 onClick={() => navigate("/stories")}
               >

@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import type { ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/atoms/button";
+import { Input } from "../components/atoms/input";
+import { Label } from "../components/atoms/label";
+import { Textarea } from "../components/atoms/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/atoms/card";
 import {
   ArrowLeft,
   Save,
@@ -24,8 +24,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
-import { ScrollArea } from "../components/ui/scroll-area";
+} from "../components/atoms/select";
+import { ScrollArea } from "../components/atoms/scroll-area";
 import { storyService, pageService, aiService, uploadService } from "../api/services";
 import type { Page, Story } from "../api/services";
 
@@ -35,8 +35,8 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../components/ui/tabs";
-import { HotspotCreator } from "../components/HotspotCreator";
+} from "../components/atoms/tabs";
+import { HotspotCreator } from "../components/organisms/HotspotCreator";
 
 export function StoryEditor() {
   const navigate = useNavigate();

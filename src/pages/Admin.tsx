@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation } from "../components/Navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Badge } from "../components/ui/badge";
+import { MainLayout } from "../components/templates/MainLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/atoms/card";
+import { Button } from "../components/atoms/button";
+import { Input } from "../components/atoms/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/atoms/tabs";
+import { Badge } from "../components/atoms/badge";
 import {
   Table,
   TableBody,
@@ -13,13 +13,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../components/ui/table";
+} from "../components/atoms/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
+} from "../components/atoms/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +29,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../components/ui/alert-dialog";
+} from "../components/atoms/alert-dialog";
 import {
   BookOpen,
   Users,
@@ -223,10 +223,8 @@ export function Admin() {
   ] : [];
 
   return (
-    <div className="min-h-screen">
-      <Navigation />
-
-      <main className="container mx-auto px-6 py-12">
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="mb-2">Admin Panel</h1>
           <p className="text-muted-foreground">
@@ -579,7 +577,7 @@ export function Admin() {
             ) : null}
           </TabsContent>
         </Tabs>
-      </main>
+      </div>
 
       {/* Action Confirmation Dialog */}
       <AlertDialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
@@ -603,6 +601,6 @@ export function Admin() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </MainLayout>
   );
 }

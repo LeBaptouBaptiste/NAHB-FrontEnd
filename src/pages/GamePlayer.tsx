@@ -4,8 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { gameService, pageService } from '../api/services';
 import type { GameSession, Page, PathStats } from '../api/services';
-import DiceRoller from '../components/DiceRoller';
-import { HotspotLayer } from '../components/HotspotLayer';
+import DiceRoller from '../components/organisms/DiceRoller';
+import { HotspotLayer } from '../components/molecules/HotspotLayer';
 import type { Hotspot } from '../utils/mathUtils';
 
 interface PlayerClass {

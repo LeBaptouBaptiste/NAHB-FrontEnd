@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Navigation } from "../components/Navigation";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { MainLayout } from "../components/templates/MainLayout";
+import { Button } from "../components/atoms/button";
+import { Badge } from "../components/atoms/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/atoms/card";
 import { Star, Eye, User, Trophy, PlayCircle, Flag } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import {
@@ -14,7 +14,7 @@ import {
   reportService,
 } from "../api/services";
 import type { Story, Rating, RatingsResponse, ReportType } from "../api/services";
-import { Textarea } from "../components/ui/textarea";
+import { Textarea } from "../components/atoms/textarea";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,8 +24,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../components/ui/alert-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+} from "../components/atoms/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/atoms/select";
 import { useAuth } from "../context/AuthContext";
 
 export function StoryDetails() {
@@ -197,10 +197,8 @@ export function StoryDetails() {
   if (!story) return <div className="min-h-screen flex items-center justify-center">Story not found</div>;
 
   return (
-    <div className="min-h-screen">
-      <Navigation />
-
-      <main className="container mx-auto px-6 py-12">
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
         {/* Hero Image */}
         <div className="relative w-full h-[400px] rounded-xl overflow-hidden mb-8">
           <ImageWithFallback
@@ -464,7 +462,7 @@ export function StoryDetails() {
             </Card>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Report dialog */}
       <AlertDialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
@@ -516,6 +514,6 @@ export function StoryDetails() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </MainLayout>
   );
 }
