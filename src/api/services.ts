@@ -158,7 +158,11 @@ export const gameService = {
     getStoryStats: async (storyId: string) => {
         const response = await api.get<StoryStats>(`/game/story/${storyId}/stats`);
         return response.data;
-    }
+    },
+	getSessionByStory: async (storyId: string) => {
+		const response = await api.get<GameSession>(`/game/session/${storyId}/by-story`);
+		return response.data;
+	},
 };
 
 export interface PathStats {

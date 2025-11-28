@@ -37,6 +37,7 @@ import {
   TabsTrigger,
 } from "../components/atoms/tabs";
 import { HotspotCreator } from "../components/organisms/HotspotCreator";
+import imageCompression from "browser-image-compression";
 
 export function StoryEditor() {
 	const navigate = useNavigate();

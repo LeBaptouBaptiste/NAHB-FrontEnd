@@ -3,7 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { MainLayout } from "../components/templates/MainLayout";
 import { Button } from "../components/atoms/button";
 import { Badge } from "../components/atoms/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/atoms/card";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "../components/atoms/card";
 import { Star, Eye, User, Trophy, PlayCircle, Flag } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import {
@@ -13,21 +18,32 @@ import {
 	ratingService,
 	reportService,
 } from "../api/services";
-import type { Story, Rating, RatingsResponse, ReportType } from "../api/services";
+import type {
+	Story,
+	Rating,
+	RatingsResponse,
+	ReportType,
+} from "../api/services";
 import { Textarea } from "../components/atoms/textarea";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
 } from "../components/atoms/alert-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/atoms/select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "../components/atoms/select";
 import { useAuth } from "../context/AuthContext";
-import { ContinueGameModal } from "../components/ui/modal-continue-game";
+import { ContinueGameModal } from "../components/atoms/modal-continue-game";
 
 export function StoryDetails() {
 	const navigate = useNavigate();
@@ -229,51 +245,65 @@ export function StoryDetails() {
 			</div>
 		);
 
-  return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
-        {/* Hero Image */}
-        <div className="relative w-full h-[400px] rounded-xl overflow-hidden mb-8">
-          <ImageWithFallback
-            src={story.imageUrl || ""}
-            alt={story.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-          <div className="absolute bottom-8 left-8 right-8">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {story.tags.map(tag => (
-                <Badge key={tag} variant="secondary" className="bg-card/80 backdrop-blur-sm">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-            <h1 className="mb-2">{story.title}</h1>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <User className="w-4 h-4" />
-                <span>Author ID: {story.authorId.substring(0, 8)}...</span>
-              </div>
-              <button
-                onClick={handleToggleFavorite}
-                disabled={favoriteLoading}
-                className="flex items-center gap-1 hover:opacity-80 transition-opacity disabled:opacity-50"
-                title={isFavorited ? "Remove from favorites" : "Add to favorites"}
-              >
-                <Star className={`w-4 h-4 ${isFavorited ? 'fill-yellow-500 text-yellow-500' : 'text-muted-foreground'}`} />
-                <span>{isFavorited ? "Favorited" : "Favorite"}</span>
-              </button>
-              <div className="flex items-center gap-1">
-                <Eye className="w-4 h-4" />
-                <span>{(story.stats?.views || 0).toLocaleString()} plays</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Trophy className="w-4 h-4" />
-                <span>{Object.keys(story.stats?.endings || {}).length} endings</span>
-              </div>
-            </div>
-          </div>
-        </div>
+	return (
+		<MainLayout>
+			<div className="container mx-auto px-4 py-8">
+				{/* Hero Image */}
+				<div className="relative w-full h-[400px] rounded-xl overflow-hidden mb-8">
+					<ImageWithFallback
+						src={story.imageUrl || ""}
+						alt={story.title}
+						className="w-full h-full object-cover"
+					/>
+					<div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+					<div className="absolute bottom-8 left-8 right-8">
+						<div className="flex flex-wrap gap-2 mb-4">
+							{story.tags.map((tag) => (
+								<Badge
+									key={tag}
+									variant="secondary"
+									className="bg-card/80 backdrop-blur-sm"
+								>
+									{tag}
+								</Badge>
+							))}
+						</div>
+						<h1 className="mb-2">{story.title}</h1>
+						<div className="flex items-center gap-4 text-sm text-muted-foreground">
+							<div className="flex items-center gap-1">
+								<User className="w-4 h-4" />
+								<span>Author ID: {story.authorId.substring(0, 8)}...</span>
+							</div>
+							<button
+								onClick={handleToggleFavorite}
+								disabled={favoriteLoading}
+								className="flex items-center gap-1 hover:opacity-80 transition-opacity disabled:opacity-50"
+								title={
+									isFavorited ? "Remove from favorites" : "Add to favorites"
+								}
+							>
+								<Star
+									className={`w-4 h-4 ${
+										isFavorited
+											? "fill-yellow-500 text-yellow-500"
+											: "text-muted-foreground"
+									}`}
+								/>
+								<span>{isFavorited ? "Favorited" : "Favorite"}</span>
+							</button>
+							<div className="flex items-center gap-1">
+								<Eye className="w-4 h-4" />
+								<span>{(story.stats?.views || 0).toLocaleString()} plays</span>
+							</div>
+							<div className="flex items-center gap-1">
+								<Trophy className="w-4 h-4" />
+								<span>
+									{Object.keys(story.stats?.endings || {}).length} endings
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
 
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 					{/* Main Content */}
@@ -505,79 +535,107 @@ export function StoryDetails() {
 							</CardContent>
 						</Card>
 
-            {/* About the Author Card */}
-            <Card className="border-border/50 hover:border-border transition-colors">
-              <CardHeader>
-                <CardTitle className="text-lg">About the Author</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center text-white font-semibold shadow-md">
-                    <span>AU</span>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium">Author {story.authorId.substring(0, 6)}</div>
-                  </div>
-                </div>
-                <Button variant="outline" className="w-full cursor-not-allowed opacity-60" disabled>
-                  View Profile
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+						{/* About the Author Card */}
+						<Card className="border-border/50 hover:border-border transition-colors">
+							<CardHeader>
+								<CardTitle className="text-lg">About the Author</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<div className="flex items-center gap-3 mb-4">
+									<div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center text-white font-semibold shadow-md">
+										<span>AU</span>
+									</div>
+									<div>
+										<div className="text-sm font-medium">
+											Author {story.authorId.substring(0, 6)}
+										</div>
+									</div>
+								</div>
+								<Button
+									variant="outline"
+									className="w-full cursor-not-allowed opacity-60"
+									disabled
+								>
+									View Profile
+								</Button>
+							</CardContent>
+						</Card>
+					</div>
+				</div>
+			</div>
 
-      {/* Report dialog */}
-      <AlertDialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Report this story</AlertDialogTitle>
-            <AlertDialogDescription>
-              Help us moderate the platform by explaining what is wrong with this story.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-3 py-2">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Reason</label>
-              <Select
-                value={reportType}
-                onValueChange={(value) => setReportType(value as ReportType)}
-              >
-                <SelectTrigger className="bg-input border-border/50">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="inappropriate_content">Inappropriate content</SelectItem>
-                  <SelectItem value="spam">Spam</SelectItem>
-                  <SelectItem value="copyright">Copyright issue</SelectItem>
-                  <SelectItem value="harassment">Harassment</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Details (optional)</label>
-              <Textarea
-                placeholder="Describe the problem..."
-                value={reportDescription}
-                onChange={(e) => setReportDescription(e.target.value)}
-                className="min-h-[80px]"
-              />
-            </div>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={reportSubmitting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleSubmitReport}
-              className="bg-destructive text-destructive-foreground"
-              disabled={reportSubmitting}
-            >
-              {reportSubmitting ? "Submitting..." : "Submit Report"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </MainLayout>
-  );
+			{/* Report dialog */}
+			<AlertDialog
+				open={reportDialogOpen}
+				onOpenChange={setReportDialogOpen}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Report this story</AlertDialogTitle>
+						<AlertDialogDescription>
+							Help us moderate the platform by explaining what is wrong with
+							this story.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<div className="space-y-3 py-2">
+						<div className="space-y-1">
+							<label className="text-sm font-medium">Reason</label>
+							<Select
+								value={reportType}
+								onValueChange={(value) => setReportType(value as ReportType)}
+							>
+								<SelectTrigger className="bg-input border-border/50">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="inappropriate_content">
+										Inappropriate content
+									</SelectItem>
+									<SelectItem value="spam">Spam</SelectItem>
+									<SelectItem value="copyright">Copyright issue</SelectItem>
+									<SelectItem value="harassment">Harassment</SelectItem>
+									<SelectItem value="other">Other</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+						<div className="space-y-1">
+							<label className="text-sm font-medium">Details (optional)</label>
+							<Textarea
+								placeholder="Describe the problem..."
+								value={reportDescription}
+								onChange={(e) => setReportDescription(e.target.value)}
+								className="min-h-[80px]"
+							/>
+						</div>
+					</div>
+					<AlertDialogFooter>
+						<AlertDialogCancel disabled={reportSubmitting}>
+							Cancel
+						</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={handleSubmitReport}
+							className="bg-destructive text-destructive-foreground"
+							disabled={reportSubmitting}
+						>
+							{reportSubmitting ? "Submitting..." : "Submit Report"}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+			<ContinueGameModal
+				open={continueModalOpen}
+				onClose={() => setContinueModalOpen(false)}
+				onContinue={() => {
+					if (resumeSessionId) {
+						navigate(`/play/${resumeSessionId}`);
+					}
+				}}
+				onRestart={async () => {
+					if (!story) return;
+					const session = await gameService.startSession(story._id);
+					navigate(`/play/${session._id}`);
+				}}
+			/>
+		</MainLayout>
+	);
 }
