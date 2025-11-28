@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import { Card } from "../components/ui/card";
+import { Button } from "../components/atoms/button";
+import { Card } from "../components/atoms/card";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { Badge } from "../components/ui/badge";
+import { Badge } from "../components/atoms/badge";
 
 interface Page {
 	id: number;
@@ -119,110 +119,110 @@ export function ReadingMode() {
 		setPathHistory((prev) => [...prev, nextPage]);
 	};
 
-	const handleEndingComplete = () => {
-		navigate(`/story/${id}/ending`, {
-			state: {
-				ending: currentPage.endingLabel,
-				path: pathHistory,
-			},
-		});
-	};
+  const handleEndingComplete = () => {
+    navigate(`/story/${id}/ending`, {
+      state: {
+        ending: currentPage.endingLabel,
+        path: pathHistory
+      }
+    });
+  };
 
-	return (
-		<div className="min-h-screen bg-background flex flex-col">
-			{/* Header */}
-			<div className="border-b border-border/50 px-6 py-4">
-				<div className="container mx-auto flex items-center justify-between">
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => navigate(`/story/${id}`)}
-					>
-						<ArrowLeft className="w-4 h-4 mr-2" />
-						Exit Story
-					</Button>
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      <div className="border-b border-border/50 px-6 py-4">
+        <div className="container mx-auto flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(`/story/${id}`)}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Exit Story
+          </Button>
 
-					<div className="flex items-center gap-2 text-sm text-muted-foreground">
-						<BookOpen className="w-4 h-4" />
-						<span>Page {pathHistory.length}</span>
-					</div>
-				</div>
-			</div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <BookOpen className="w-4 h-4" />
+            <span>Page {pathHistory.length}</span>
+          </div>
+        </div>
+      </div>
 
-			{/* Main Reading Area */}
-			<div className="flex-1 flex items-center justify-center p-6">
-				<div className="w-full max-w-4xl">
-					<Card className="overflow-hidden">
-						{currentPage.imageUrl && (
-							<div className="aspect-video w-full bg-muted relative overflow-hidden">
-								<ImageWithFallback
-									src={currentPage.imageUrl}
-									alt="Story illustration"
-									className="w-full h-full object-cover"
-								/>
-								{currentPage.isEnding && (
-									<div className="absolute top-4 right-4">
-										<Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0">
-											{currentPage.endingLabel}
-										</Badge>
-									</div>
-								)}
-							</div>
-						)}
+      {/* Main Reading Area */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-4xl">
+          <Card className="overflow-hidden">
+            {currentPage.imageUrl && (
+              <div className="aspect-video w-full bg-muted relative overflow-hidden">
+                <ImageWithFallback
+                  src={currentPage.imageUrl}
+                  alt="Story illustration"
+                  className="w-full h-full object-cover"
+                />
+                {currentPage.isEnding && (
+                  <div className="absolute top-4 right-4">
+                    <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0">
+                      {currentPage.endingLabel}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            )}
 
-						<div className="p-8 md:p-12">
-							{/* Story Text */}
-							<div className="prose prose-invert max-w-none mb-8">
-								<p className="text-lg leading-relaxed">{currentPage.text}</p>
-							</div>
+            <div className="p-8 md:p-12">
+              {/* Story Text */}
+              <div className="prose prose-invert max-w-none mb-8">
+                <p className="text-lg leading-relaxed">
+                  {currentPage.text}
+                </p>
+              </div>
 
-							{/* Choices or Ending */}
-							{currentPage.isEnding ? (
-								<div className="space-y-4">
-									<div className="p-6 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg border border-primary/30 text-center">
-										<h3 className="mb-2">You've reached an ending!</h3>
-										<p className="text-muted-foreground">
-											Congratulations on completing this path through the story.
-										</p>
-									</div>
-									<div className="flex gap-4">
-										<Button
-											variant="outline"
-											className="flex-1"
-											onClick={() => {
-												setCurrentPageId(1);
-												setPathHistory([1]);
-											}}
-										>
-											Replay Story
-										</Button>
-										<Button
-											className="flex-1"
-											onClick={handleEndingComplete}
-										>
-											View Results
-										</Button>
-									</div>
-								</div>
-							) : (
-								<div className="space-y-3">
-									<p className="text-sm text-muted-foreground mb-4">
-										What do you do?
-									</p>
-									{currentPage.choices.map((choice, index) => (
-										<Button
-											key={index}
-											variant="outline"
-											className="w-full justify-start h-auto py-4 px-6 hover:bg-primary/10 hover:border-primary/50 transition-all"
-											onClick={() => handleChoice(choice.nextPage)}
-										>
-											<span className="text-left">{choice.text}</span>
-										</Button>
-									))}
-								</div>
-							)}
-						</div>
-					</Card>
+              {/* Choices or Ending */}
+              {currentPage.isEnding ? (
+                <div className="space-y-4">
+                  <div className="p-6 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg border border-primary/30 text-center">
+                    <h3 className="mb-2">You've reached an ending!</h3>
+                    <p className="text-muted-foreground">
+                      Congratulations on completing this path through the story.
+                    </p>
+                  </div>
+                  <div className="flex gap-4">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        setCurrentPageId(1);
+                        setPathHistory([1]);
+                      }}
+                    >
+                      Replay Story
+                    </Button>
+                    <Button
+                      className="flex-1"
+                      onClick={handleEndingComplete}
+                    >
+                      View Results
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground mb-4">What do you do?</p>
+                  {currentPage.choices.map((choice, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      className="w-full justify-start h-auto py-4 px-6 hover:bg-primary/10 hover:border-primary/50 transition-all"
+                      onClick={() => handleChoice(choice.nextPage)}
+                    >
+                      <span className="text-left">{choice.text}</span>
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
 
 					{/* Path Breadcrumb */}
 					<div className="mt-6 flex items-center justify-center gap-2">

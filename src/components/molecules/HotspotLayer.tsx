@@ -1,5 +1,5 @@
-import type { Hotspot } from "../utils/mathUtils";
-import { MousePointerClick } from "lucide-react";
+import type { Hotspot } from '../../utils/mathUtils';
+import { MousePointerClick } from 'lucide-react';
 
 interface HotspotLayerProps {
 	imageUrl: string;

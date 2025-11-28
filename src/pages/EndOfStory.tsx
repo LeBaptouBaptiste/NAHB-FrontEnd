@@ -1,13 +1,8 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "../components/ui/card";
+import { Button } from "../components/atoms/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/atoms/card";
 import { Trophy, RotateCcw, List, TrendingUp } from "lucide-react";
-import { Badge } from "../components/ui/badge";
+import { Badge } from "../components/atoms/badge";
 
 export function EndOfStory() {
 	const navigate = useNavigate();
@@ -44,52 +39,46 @@ export function EndOfStory() {
 		{ step: 4, description: `Reached: ${ending}` },
 	];
 
-	return (
-		<div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-			{/* Background */}
-			<div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
-			<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
 
-			<div className="w-full max-w-4xl relative z-10 space-y-6">
-				{/* Ending Header */}
-				<div className="text-center mb-8">
-					<div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mb-6">
-						<Trophy className="w-10 h-10 text-white" />
-					</div>
-					<h1 className="mb-4">Story Complete!</h1>
-					<Badge
-						className={`bg-gradient-to-r ${currentEndingStats.color} text-white border-0 px-6 py-2 text-lg`}
-					>
-						{ending}
-					</Badge>
-				</div>
+      <div className="w-full max-w-4xl relative z-10 space-y-6">
+        {/* Ending Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mb-6">
+            <Trophy className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="mb-4">Story Complete!</h1>
+          <Badge className={`bg-gradient-to-r ${currentEndingStats.color} text-white border-0 px-6 py-2 text-lg`}>
+            {ending}
+          </Badge>
+        </div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					{/* Stats Card */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<TrendingUp className="w-5 h-5" />
-								Ending Statistics
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-6">
-							<div>
-								<div className="flex items-center justify-between mb-2">
-									<span className="text-sm text-muted-foreground">
-										Players who reached this ending
-									</span>
-									<span className="text-2xl font-semibold">
-										{currentEndingStats.percentage}%
-									</span>
-								</div>
-								<div className="w-full h-3 bg-muted rounded-full overflow-hidden">
-									<div
-										className={`h-full bg-gradient-to-r ${currentEndingStats.color} transition-all duration-1000`}
-										style={{ width: `${currentEndingStats.percentage}%` }}
-									/>
-								</div>
-							</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Stats Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Ending Statistics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">Players who reached this ending</span>
+                  <span className="text-2xl font-semibold">{currentEndingStats.percentage}%</span>
+                </div>
+                <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className={`h-full bg-gradient-to-r ${currentEndingStats.color} transition-all duration-1000`}
+                    style={{ width: `${currentEndingStats.percentage}%` }}
+                  />
+                </div>
+              </div>
 
 							<div className="grid grid-cols-2 gap-4">
 								<div className="p-4 bg-muted/50 rounded-lg text-center">
@@ -118,74 +107,62 @@ export function EndOfStory() {
 						</CardContent>
 					</Card>
 
-					{/* Path Card */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<List className="w-5 h-5" />
-								Your Journey
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="space-y-4">
-								{pathSteps.map((item, index) => (
-									<div
-										key={index}
-										className="flex gap-4"
-									>
-										<div className="flex flex-col items-center">
-											<div
-												className={`w-8 h-8 rounded-full flex items-center justify-center ${
-													index === pathSteps.length - 1
-														? `bg-gradient-to-br ${currentEndingStats.color}`
-														: "bg-muted"
-												}`}
-											>
-												<span className="text-sm">{item.step}</span>
-											</div>
-											{index < pathSteps.length - 1 && (
-												<div className="w-px h-12 bg-border mt-2" />
-											)}
-										</div>
-										<div className="flex-1 pt-1">
-											<p
-												className={
-													index === pathSteps.length - 1
-														? "font-semibold"
-														: "text-muted-foreground"
-												}
-											>
-												{item.description}
-											</p>
-										</div>
-									</div>
-								))}
-							</div>
-						</CardContent>
-					</Card>
-				</div>
+          {/* Path Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <List className="w-5 h-5" />
+                Your Journey
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {pathSteps.map((item, index) => (
+                  <div key={index} className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${index === pathSteps.length - 1
+                          ? `bg-gradient-to-br ${currentEndingStats.color}`
+                          : 'bg-muted'
+                        }`}>
+                        <span className="text-sm">{item.step}</span>
+                      </div>
+                      {index < pathSteps.length - 1 && (
+                        <div className="w-px h-12 bg-border mt-2" />
+                      )}
+                    </div>
+                    <div className="flex-1 pt-1">
+                      <p className={index === pathSteps.length - 1 ? 'font-semibold' : 'text-muted-foreground'}>
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-				{/* Actions */}
-				<Card>
-					<CardContent className="p-6">
-						<div className="flex flex-col sm:flex-row gap-4">
-							<Button
-								variant="outline"
-								className="flex-1 gap-2"
-								onClick={() => navigate(`/read/${id}`)}
-							>
-								<RotateCcw className="w-4 h-4" />
-								Replay Story
-							</Button>
-							<Button
-								className="flex-1"
-								onClick={() => navigate("/stories")}
-							>
-								Browse More Stories
-							</Button>
-						</div>
-					</CardContent>
-				</Card>
+        {/* Actions */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button
+                variant="outline"
+                className="flex-1 gap-2"
+                onClick={() => navigate(`/read/${id}`)}
+              >
+                <RotateCcw className="w-4 h-4" />
+                Replay Story
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => navigate("/stories")}
+              >
+                Browse More Stories
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
 				{/* Share Section */}
 				<div className="text-center">

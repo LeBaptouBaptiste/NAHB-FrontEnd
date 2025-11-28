@@ -1,41 +1,37 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation } from "../components/Navigation";
-import { Button } from "../components/ui/button";
+import { MainLayout } from "../components/templates/MainLayout";
+import { Button } from "../components/atoms/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../components/atoms/card";
+import { Badge } from "../components/atoms/badge";
 import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import {
-	Plus,
-	Edit,
-	Trash2,
-	Eye,
-	GitBranch,
-	MoreVertical,
-	FileText,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  GitBranch,
+  MoreVertical,
+  FileText,
+  Upload,
+  Download
 } from "lucide-react";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/atoms/dropdown-menu";
 import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "../components/ui/alert-dialog";
-import { storyService, ratingService } from "../api/services";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/atoms/alert-dialog";
+import { storyService, ratingService, migrationService } from "../api/services";
 import type { Story } from "../api/services";
 import { toast } from "sonner";
 
@@ -84,8 +80,45 @@ export function MyStories() {
 			})
 		);
 
-		setRatings(ratingsMap);
-	};
+    setRatings(ratingsMap);
+  };
+
+  const handleExport = async (storyId: string, title: string) => {
+    try {
+      const blob = await migrationService.exportStory(storyId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_export.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success("Story exported successfully!");
+    } catch (error) {
+      console.error("Failed to export story:", error);
+      toast.error("Failed to export story.");
+    }
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      try {
+        setLoading(true);
+        await migrationService.importStory(file);
+        toast.success("Story imported successfully!");
+        loadStories(); // Reload list
+      } catch (error: any) {
+        console.error("Failed to import story:", error);
+        toast.error(error.response?.data?.message || "Failed to import story.");
+      } finally {
+        setLoading(false);
+        // Reset input
+        e.target.value = '';
+      }
+    }
+  };
 
 	const handleDelete = (id: string) => {
 		setStoryToDelete(id);
@@ -152,34 +185,46 @@ export function MyStories() {
 		);
 	}
 
-	return (
-		<div className="min-h-screen">
-			<Navigation />
+  return (
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+                <FileText className="w-8 h-8 text-emerald-500" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+                My Stories
+              </h1>
+            </div>
+            <p className="text-muted-foreground text-lg ml-1">
+              Create and manage your interactive adventures
+            </p>
+          </div>
 
-			<main className="container mx-auto px-6 py-12">
-				<div className="flex items-center justify-between mb-8">
-					<div>
-						<div className="flex items-center gap-3 mb-2">
-							<div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
-								<FileText className="w-8 h-8 text-emerald-500" />
-							</div>
-							<h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
-								My Stories
-							</h1>
-						</div>
-						<p className="text-muted-foreground text-lg ml-1">
-							Create and manage your interactive adventures
-						</p>
-					</div>
-
-					<Button
-						className="gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all"
-						onClick={() => navigate("/editor/new")}
-					>
-						<Plus className="w-4 h-4" />
-						New Story
-					</Button>
-				</div>
+          <div className="flex gap-2">
+            <div className="relative">
+              <input
+                type="file"
+                accept=".zip"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={handleImport}
+              />
+              <Button variant="outline" className="gap-2 border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-500">
+                <Upload className="w-4 h-4" />
+                Import
+              </Button>
+            </div>
+            <Button
+              className="gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all"
+              onClick={() => navigate("/editor/new")}
+            >
+              <Plus className="w-4 h-4" />
+              New Story
+            </Button>
+          </div>
+        </div>
 
 				{/* Stats Overview */}
 				<div className="overflow-x-auto pb-4 -mx-6 px-6 md:mx-0 md:px-0">
@@ -250,28 +295,25 @@ export function MyStories() {
 										</p>
 									</div>
 
-									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
-											<Button
-												variant="ghost"
-												size="sm"
-											>
-												<MoreVertical className="w-4 h-4" />
-											</Button>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent align="end">
-											<DropdownMenuItem
-												onClick={() => navigate(`/editor/${story._id}`)}
-											>
-												<Edit className="w-4 h-4 mr-2" />
-												Edit
-											</DropdownMenuItem>
-											<DropdownMenuItem
-												onClick={() => navigate(`/editor/${story._id}/flow`)}
-											>
-												<GitBranch className="w-4 h-4 mr-2" />
-												View Flow
-											</DropdownMenuItem>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => navigate(`/editor/${story._id}`)}>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate(`/editor/${story._id}/flow`)}>
+                        <GitBranch className="w-4 h-4 mr-2" />
+                        View Flow
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleExport(story._id, story.title)}>
+                        <Download className="w-4 h-4 mr-2" />
+                        Export
+                      </DropdownMenuItem>
 
 											<DropdownMenuItem
 												onClick={() => handleDelete(story._id)}
@@ -364,45 +406,38 @@ export function MyStories() {
 					))}
 				</div>
 
-				{stories.length === 0 && (
-					<Card className="text-center py-12">
-						<CardContent>
-							<p className="text-muted-foreground mb-4">
-								You haven't created any stories yet.
-							</p>
-							<Button onClick={() => navigate("/editor/new")}>
-								<Plus className="w-4 h-4 mr-2" />
-								Create Your First Story
-							</Button>
-						</CardContent>
-					</Card>
-				)}
-			</main>
+        {stories.length === 0 && (
+          <Card className="text-center py-12">
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                You haven't created any stories yet.
+              </p>
+              <Button onClick={() => navigate("/editor/new")}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Your First Story
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
-			{/* Delete Confirmation Dialog */}
-			<AlertDialog
-				open={deleteDialogOpen}
-				onOpenChange={setDeleteDialogOpen}
-			>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Are you sure?</AlertDialogTitle>
-						<AlertDialogDescription>
-							This will permanently delete your story. This action cannot be
-							undone.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction
-							onClick={confirmDelete}
-							className="bg-destructive text-destructive-foreground"
-						>
-							Delete
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
-		</div>
-	);
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete your story. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </MainLayout>
+  );
 }

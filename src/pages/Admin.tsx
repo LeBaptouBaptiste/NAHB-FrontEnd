@@ -1,45 +1,35 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation } from "../components/Navigation";
+import { MainLayout } from "../components/templates/MainLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/atoms/card";
+import { Button } from "../components/atoms/button";
+import { Input } from "../components/atoms/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/atoms/tabs";
+import { Badge } from "../components/atoms/badge";
 import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/atoms/table";
 import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from "../components/ui/tabs";
-import { Badge } from "../components/ui/badge";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/atoms/dropdown-menu";
 import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "../components/ui/table";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "../components/ui/alert-dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/atoms/alert-dialog";
 import {
 	BookOpen,
 	Users,
@@ -274,17 +264,15 @@ export function Admin() {
 		  ]
 		: [];
 
-	return (
-		<div className="min-h-screen">
-			<Navigation />
-
-			<main className="container mx-auto px-6 py-12">
-				<div className="mb-8">
-					<h1 className="mb-2">Admin Panel</h1>
-					<p className="text-muted-foreground">
-						Manage stories, users, and reports
-					</p>
-				</div>
+  return (
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="mb-2">Admin Panel</h1>
+          <p className="text-muted-foreground">
+            Manage stories, users, and reports
+          </p>
+        </div>
 
 				{/* Stats Overview */}
 				{loading ? (
@@ -735,65 +723,51 @@ export function Admin() {
 									</CardContent>
 								</Card>
 
-								<Card>
-									<CardHeader>
-										<CardTitle>Reports Status</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<div className="space-y-3">
-											<div className="flex items-center justify-between">
-												<span className="text-sm">Pending Reports</span>
-												<span className="text-sm font-semibold">
-													{stats.reports.pending}
-												</span>
-											</div>
-											<div className="flex items-center justify-between">
-												<span className="text-sm">Total Reports</span>
-												<span className="text-sm font-semibold">
-													{stats.reports.total}
-												</span>
-											</div>
-										</div>
-									</CardContent>
-								</Card>
-							</div>
-						) : null}
-					</TabsContent>
-				</Tabs>
-			</main>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Reports Status</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Pending Reports</span>
+                        <span className="text-sm font-semibold">{stats.reports.pending}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Total Reports</span>
+                        <span className="text-sm font-semibold">{stats.reports.total}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
+          </TabsContent>
+        </Tabs>
+      </div>
 
-			{/* Action Confirmation Dialog */}
-			<AlertDialog
-				open={actionDialogOpen}
-				onOpenChange={setActionDialogOpen}
-			>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Confirm Action</AlertDialogTitle>
-						<AlertDialogDescription>
-							{actionType === "ban" &&
-								"Are you sure you want to ban this user?"}
-							{actionType === "suspend" &&
-								"Are you sure you want to suspend this story?"}
-							{actionType === "resolve" &&
-								"Are you sure you want to resolve this report?"}
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction
-							onClick={confirmAction}
-							className={
-								actionType === "ban" || actionType === "suspend"
-									? "bg-destructive text-destructive-foreground"
-									: ""
-							}
-						>
-							Confirm
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
-		</div>
-	);
+      {/* Action Confirmation Dialog */}
+      <AlertDialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Action</AlertDialogTitle>
+            <AlertDialogDescription>
+              {actionType === "ban" && "Are you sure you want to ban this user?"}
+              {actionType === "suspend" && "Are you sure you want to suspend this story?"}
+              {actionType === "resolve" && "Are you sure you want to resolve this report?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmAction}
+              className={actionType === "ban" || actionType === "suspend" ? "bg-destructive text-destructive-foreground" : ""}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </MainLayout>
+  );
 }

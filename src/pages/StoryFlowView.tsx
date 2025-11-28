@@ -1,49 +1,35 @@
 import { useCallback, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-	ReactFlow,
-	Controls,
-	Background,
-	type Connection,
-	type NodeChange,
-	type EdgeChange,
-	BackgroundVariant,
-	BaseEdge,
-	EdgeLabelRenderer,
-	getBezierPath,
-	useReactFlow,
-	type EdgeProps,
-	MiniMap,
-	ReactFlowProvider,
-	applyNodeChanges,
-	applyEdgeChanges,
-} from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
-import StoryNode from "../components/StoryNode";
-import { Button } from "../components/ui/button";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
-import { Switch } from "../components/ui/switch";
-import {
-	ArrowLeft,
-	Plus,
-	Save,
-	Loader2,
-	Trash2,
-	Upload,
-	AlertCircle,
-} from "lucide-react";
-import { useStoryFlow, type TStoryNode } from "../hooks/useStoryFlow";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "../components/ui/select";
-import { uploadService } from "../api/services";
-import { ScrollArea } from "../components/ui/scroll-area";
-import { Alert, AlertDescription } from "../components/ui/alert";
+    ReactFlow,
+    Controls,
+    Background,
+    type Connection,
+    type NodeChange,
+    type EdgeChange,
+    BackgroundVariant,
+    BaseEdge,
+    EdgeLabelRenderer,
+    getBezierPath,
+    useReactFlow,
+    type EdgeProps,
+    MiniMap,
+    ReactFlowProvider,
+    applyNodeChanges,
+    applyEdgeChanges,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import StoryNode from '../components/organisms/StoryNode';
+import { Button } from '../components/atoms/button';
+import { Label } from '../components/atoms/label';
+import { Textarea } from '../components/atoms/textarea';
+import { Switch } from '../components/atoms/switch';
+import { ArrowLeft, Plus, Save, Loader2, Trash2, Upload, AlertCircle } from 'lucide-react';
+import { useStoryFlow, type TStoryNode } from '../hooks/useStoryFlow';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/atoms/select';
+import { uploadService } from '../api/services';
+import { ScrollArea } from '../components/atoms/scroll-area';
+import { Alert, AlertDescription } from '../components/atoms/alert';
 
 // --- Custom Edge Component for Editable Labels ---
 const StoryEdge = ({

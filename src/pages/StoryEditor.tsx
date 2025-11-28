@@ -1,16 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import type { ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "../components/ui/card";
+import { Button } from "../components/atoms/button";
+import { Input } from "../components/atoms/input";
+import { Label } from "../components/atoms/label";
+import { Textarea } from "../components/atoms/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/atoms/card";
 import {
 	ArrowLeft,
 	Save,
@@ -24,30 +19,24 @@ import {
 	Volume2,
 } from "lucide-react";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "../components/ui/select";
-import { ScrollArea } from "../components/ui/scroll-area";
-import {
-	storyService,
-	pageService,
-	aiService,
-	uploadService,
-} from "../api/services";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/atoms/select";
+import { ScrollArea } from "../components/atoms/scroll-area";
+import { storyService, pageService, aiService, uploadService } from "../api/services";
 import type { Page, Story } from "../api/services";
 
 import { toast } from "sonner";
 import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from "../components/ui/tabs";
-import { HotspotCreator } from "../components/HotspotCreator";
-import imageCompression from "browser-image-compression";
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/atoms/tabs";
+import { HotspotCreator } from "../components/organisms/HotspotCreator";
 
 export function StoryEditor() {
 	const navigate = useNavigate();
@@ -1296,105 +1285,111 @@ export function StoryEditor() {
 															)}
 														</div>
 
-														{choice.diceRoll?.enabled && (
-															<div className="space-y-3 pl-6 bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/20">
-																<div className="grid grid-cols-2 gap-3">
-																	<div className="space-y-2">
-																		<Label
-																			htmlFor={`difficulty-${index}`}
-																			className="text-sm"
-																		>
-																			Difficulty (DC)
-																		</Label>
-																		<Input
-																			id={`difficulty-${index}`}
-																			type="number"
-																			min={5}
-																			max={30}
-																			value={choice.diceRoll?.difficulty || 15}
-																			onChange={(
-																				e: ChangeEvent<HTMLInputElement>
-																			) => {
-																				const currentDiceRoll =
-																					choice.diceRoll || {
-																						enabled: true,
-																						difficulty: 15,
-																						type: "combat" as const,
-																					};
-																				updateChoice(index, {
-																					diceRoll: {
-																						...currentDiceRoll,
-																						difficulty: parseInt(
-																							e.target.value
-																						),
-																					},
-																				});
-																			}}
-																			className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors"
-																		/>
-																	</div>
-																	<div className="space-y-2">
-																		<Label
-																			htmlFor={`type-${index}`}
-																			className="text-sm"
-																		>
-																			Type
-																		</Label>
-																		<Select
-																			value={choice.diceRoll?.type || "combat"}
-																			onValueChange={(
-																				value:
-																					| "combat"
-																					| "stealth"
-																					| "persuasion"
-																					| "custom"
-																			) => {
-																				const currentDiceRoll =
-																					choice.diceRoll || {
-																						enabled: true,
-																						difficulty: 15,
-																						type: "combat" as const,
-																					};
-																				updateChoice(index, {
-																					diceRoll: {
-																						...currentDiceRoll,
-																						type: value,
-																					},
-																				});
-																			}}
-																		>
-																			<SelectTrigger
-																				id={`type-${index}`}
-																				className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors"
-																			>
-																				<SelectValue />
-																			</SelectTrigger>
-																			<SelectContent>
-																				<SelectItem value="combat">
-																					⚔️ Combat
-																				</SelectItem>
-																				<SelectItem value="stealth">
-																					🥷 Stealth
-																				</SelectItem>
-																				<SelectItem value="persuasion">
-																					💬 Persuasion
-																				</SelectItem>
-																				<SelectItem value="custom">
-																					🎲 Custom
-																				</SelectItem>
-																			</SelectContent>
-																		</Select>
-																	</div>
-																</div>
-																<p className="text-xs text-muted-foreground">
-																	Players will roll 1d20. Success if roll ≥{" "}
-																	{choice.diceRoll?.difficulty || 15}
-																</p>
-															</div>
-														)}
-													</div>
-												</div>
-											))}
+                            {choice.diceRoll?.enabled && (
+                              <div className="space-y-3 pl-6 bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/20">
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`difficulty-${index}`} className="text-sm">Difficulty (DC)</Label>
+                                    <Input
+                                      id={`difficulty-${index}`}
+                                      type="number"
+                                      min={5}
+                                      max={30}
+                                      value={choice.diceRoll?.difficulty || 15}
+                                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                        const currentDiceRoll = choice.diceRoll || { enabled: true, difficulty: 15, type: 'combat' as const };
+                                        updateChoice(index, {
+                                          diceRoll: { ...currentDiceRoll, difficulty: parseInt(e.target.value) }
+                                        });
+                                      }}
+                                      className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`type-${index}`} className="text-sm">Type</Label>
+                                    <Select
+                                      value={choice.diceRoll?.type || 'combat'}
+                                      onValueChange={(value: 'combat' | 'stealth' | 'persuasion' | 'custom') => {
+                                        const currentDiceRoll = choice.diceRoll || { enabled: true, difficulty: 15, type: 'combat' as const };
+                                        updateChoice(index, {
+                                          diceRoll: { ...currentDiceRoll, type: value }
+                                        });
+                                      }}
+                                    >
+                                      <SelectTrigger id={`type-${index}`} className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="combat">⚔️ Combat</SelectItem>
+                                        <SelectItem value="stealth">🥷 Stealth</SelectItem>
+                                        <SelectItem value="persuasion">💬 Persuasion</SelectItem>
+                                        <SelectItem value="custom">🎲 Custom</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`success-page-${index}`} className="text-sm">Success Page (Optional)</Label>
+                                    <Select
+                                      value={choice.diceRoll?.successPageId || 'none'}
+                                      onValueChange={(value) => {
+                                        const currentDiceRoll = choice.diceRoll || { enabled: true, difficulty: 15, type: 'combat' as const };
+                                        updateChoice(index, {
+                                          diceRoll: {
+                                            ...currentDiceRoll,
+                                            successPageId: value === 'none' ? undefined : value
+                                          }
+                                        });
+                                      }}
+                                    >
+                                      <SelectTrigger id={`success-page-${index}`} className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors">
+                                        <SelectValue placeholder="Select a page..." />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="none">None (Use Target Page)</SelectItem>
+                                        {pages.filter(p => p._id !== selectedPage._id).map(page => (
+                                          <SelectItem key={page._id} value={page._id}>
+                                            Page {pages.findIndex(p => p._id === page._id) + 1} - {page.content.substring(0, 20)}...
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`failure-page-${index}`} className="text-sm">Failure Page (Optional)</Label>
+                                    <Select
+                                      value={choice.diceRoll?.failurePageId || 'none'}
+                                      onValueChange={(value) => {
+                                        const currentDiceRoll = choice.diceRoll || { enabled: true, difficulty: 15, type: 'combat' as const };
+                                        updateChoice(index, {
+                                          diceRoll: {
+                                            ...currentDiceRoll,
+                                            failurePageId: value === 'none' ? undefined : value
+                                          }
+                                        });
+                                      }}
+                                    >
+                                      <SelectTrigger id={`failure-page-${index}`} className="bg-card/50 backdrop-blur-sm border-white/10 focus:border-emerald-500 transition-colors">
+                                        <SelectValue placeholder="Select a page..." />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="none">None (Stay on page)</SelectItem>
+                                        {pages.filter(p => p._id !== selectedPage._id).map(page => (
+                                          <SelectItem key={page._id} value={page._id}>
+                                            Page {pages.findIndex(p => p._id === page._id) + 1} - {page.content.substring(0, 20)}...
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-2">
+                                  Players will roll 1d20. Success if roll ≥ {choice.diceRoll?.difficulty || 15}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
 
 											{selectedPage.choices.length === 0 && (
 												<div className="text-center py-8 text-muted-foreground text-sm">
