@@ -20,51 +20,51 @@ export interface Story {
 }
 
 export interface Page {
-    _id: string;
-    storyId: string;
-    content: string;
-    image?: string;
-    choices: {
-        text: string;
-        targetPageId: string;
-        condition?: {
-            type: 'has_item';
-            value: string;
-        };
-        rewards?: {
-            type: 'add_item';
-            value: string;
-        }[];
-        diceRoll?: {
-            enabled: boolean;
-            difficulty?: number; // DC (Difficulty Class)
-            type?: 'combat' | 'stealth' | 'persuasion' | 'custom';
-            failurePageId?: string;
-            successPageId?: string;
-        };
-        audio?: {
-            src: string;
-            type: 'music' | 'sfx';
-            duration?: number;
-            loop?: boolean;
-        }[];
-    }[];
-    isEnding: boolean;
-    endingType?: 'success' | 'failure' | 'neutral';
-    hotspots?: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-        targetPageId: string;
-        label?: string;
-        diceRoll?: {
-            enabled: boolean;
-            difficulty?: number;
-            type?: 'combat' | 'stealth' | 'persuasion' | 'custom';
-            failurePageId?: string;
-        };
-    }[];
+	_id: string;
+	storyId: string;
+	content: string;
+	image?: string;
+	choices: {
+		text: string;
+		targetPageId: string;
+		condition?: {
+			type: "has_item";
+			value: string;
+		};
+		rewards?: {
+			type: "add_item";
+			value: string;
+		}[];
+		diceRoll?: {
+			enabled: boolean;
+			difficulty?: number; // DC (Difficulty Class)
+			type?: "combat" | "stealth" | "persuasion" | "custom";
+			failurePageId?: string;
+			successPageId?: string;
+		};
+		audio?: {
+			src: string;
+			type: "music" | "sfx";
+			duration?: number;
+			loop?: boolean;
+		}[];
+	}[];
+	isEnding: boolean;
+	endingType?: "success" | "failure" | "neutral";
+	hotspots?: {
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+		targetPageId: string;
+		label?: string;
+		diceRoll?: {
+			enabled: boolean;
+			difficulty?: number;
+			type?: "combat" | "stealth" | "persuasion" | "custom";
+			failurePageId?: string;
+		};
+	}[];
 }
 
 export const storyService = {
@@ -135,32 +135,49 @@ export interface GameSession {
 }
 
 export const gameService = {
-    startSession: async (storyId: string, preview: boolean = false) => {
-        const response = await api.post<GameSession>('/game/start', { storyId, preview });
-        return response.data;
-    },
-    getSession: async (sessionId: string) => {
-        const response = await api.get<GameSession>(`/game/session/${sessionId}`);
-        return response.data;
-    },
-    makeChoice: async (sessionId: string, choiceIndex?: number, hotspotIndex?: number, diceRollSuccess?: boolean) => {
-        const response = await api.post<GameSession>('/game/choice', { sessionId, choiceIndex, hotspotIndex, diceRollSuccess });
-        return response.data;
-    },
-    getUserSessions: async () => {
-        const response = await api.get<GameSession[]>('/game/sessions');
-        return response.data;
-    },
-    getPathStats: async (sessionId: string) => {
-        const response = await api.get<PathStats>(`/game/session/${sessionId}/path-stats`);
-        return response.data;
-    },
-    getStoryStats: async (storyId: string) => {
-        const response = await api.get<StoryStats>(`/game/story/${storyId}/stats`);
-        return response.data;
-    },
+	startSession: async (storyId: string, preview: boolean = false) => {
+		const response = await api.post<GameSession>("/game/start", {
+			storyId,
+			preview,
+		});
+		return response.data;
+	},
+	getSession: async (sessionId: string) => {
+		const response = await api.get<GameSession>(`/game/session/${sessionId}`);
+		return response.data;
+	},
+	makeChoice: async (
+		sessionId: string,
+		choiceIndex?: number,
+		hotspotIndex?: number,
+		diceRollSuccess?: boolean
+	) => {
+		const response = await api.post<GameSession>("/game/choice", {
+			sessionId,
+			choiceIndex,
+			hotspotIndex,
+			diceRollSuccess,
+		});
+		return response.data;
+	},
+	getUserSessions: async () => {
+		const response = await api.get<GameSession[]>("/game/sessions");
+		return response.data;
+	},
+	getPathStats: async (sessionId: string) => {
+		const response = await api.get<PathStats>(
+			`/game/session/${sessionId}/path-stats`
+		);
+		return response.data;
+	},
+	getStoryStats: async (storyId: string) => {
+		const response = await api.get<StoryStats>(`/game/story/${storyId}/stats`);
+		return response.data;
+	},
 	getSessionByStory: async (storyId: string) => {
-		const response = await api.get<GameSession>(`/game/session/${storyId}/by-story`);
+		const response = await api.get<GameSession>(
+			`/game/session/${storyId}/by-story`
+		);
 		return response.data;
 	},
 };
@@ -435,20 +452,24 @@ export const adminService = {
 };
 
 export const migrationService = {
-    exportStory: async (storyId: string) => {
-        const response = await api.get(`/migration/export/${storyId}`, {
-            responseType: 'blob'
-        });
-        return response.data;
-    },
-    importStory: async (file: File) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        const response = await api.post<{ message: string; storyId: string }>('/migration/import', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        return response.data;
-    },
+	exportStory: async (storyId: string) => {
+		const response = await api.get(`/migration/export/${storyId}`, {
+			responseType: "blob",
+		});
+		return response.data;
+	},
+	importStory: async (file: File) => {
+		const formData = new FormData();
+		formData.append("file", file);
+		const response = await api.post<{ message: string; storyId: string }>(
+			"/migration/import",
+			formData,
+			{
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			}
+		);
+		return response.data;
+	},
 };

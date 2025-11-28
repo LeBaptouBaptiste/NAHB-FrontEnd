@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
-import { Rnd } from 'react-rnd';
-import { Button } from '../atoms/button';
-import { Input } from '../atoms/input';
-import { Label } from '../atoms/label';
-import { Trash2, Save, Plus, MousePointerClick } from 'lucide-react';
-import type { Hotspot, Dimensions } from '../../utils/mathUtils';
-import { pixelsToPercentage, percentageToPixels } from '../../utils/mathUtils';
-import { Card } from '../atoms/card';
+import { useState, useRef, useEffect } from "react";
+import { Rnd } from "react-rnd";
+import { Button } from "../atoms/button";
+import { Input } from "../atoms/input";
+import { Label } from "../atoms/label";
+import { Trash2, Save, Plus, MousePointerClick } from "lucide-react";
+import type { Hotspot, Dimensions } from "../../utils/mathUtils";
+import { pixelsToPercentage, percentageToPixels } from "../../utils/mathUtils";
+import { Card } from "../atoms/card";
 
 interface HotspotCreatorProps {
 	imageUrl: string;

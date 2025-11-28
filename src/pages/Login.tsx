@@ -4,7 +4,14 @@ import { BookOpen } from "lucide-react";
 import { Button } from "../components/atoms/button";
 import { Input } from "../components/atoms/input";
 import { Label } from "../components/atoms/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/atoms/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "../components/atoms/card";
 import { useAuth } from "../context/AuthContext";
 
 export function Login() {

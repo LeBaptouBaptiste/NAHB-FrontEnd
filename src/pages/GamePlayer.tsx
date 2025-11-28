@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { gameService, pageService } from '../api/services';
-import type { GameSession, Page, PathStats } from '../api/services';
-import DiceRoller from '../components/organisms/DiceRoller';
-import { HotspotLayer } from '../components/molecules/HotspotLayer';
-import type { Hotspot } from '../utils/mathUtils';
+import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { gameService, pageService } from "../api/services";
+import type { GameSession, Page, PathStats } from "../api/services";
+import DiceRoller from "../components/organisms/DiceRoller";
+import { HotspotLayer } from "../components/molecules/HotspotLayer";
+import type { Hotspot } from "../utils/mathUtils";
 
 interface PlayerClass {
 	name: string;
@@ -93,37 +93,41 @@ const GamePlayer = () => {
 	const handleChoice = async (choiceIndex: number, choiceText: string) => {
 		if (!session || !currentPage) return;
 
-        const choice = currentPage.choices[choiceIndex];
-        console.log('handleChoice debug:', {
-            choiceIndex,
-            choiceText,
-            choice,
-            diceRoll: choice.diceRoll,
-            hasDiceRoll: !!choice.diceRoll,
-            enabled: choice.diceRoll?.enabled
-        });
+		const choice = currentPage.choices[choiceIndex];
+		console.log("handleChoice debug:", {
+			choiceIndex,
+			choiceText,
+			choice,
+			diceRoll: choice.diceRoll,
+			hasDiceRoll: !!choice.diceRoll,
+			enabled: choice.diceRoll?.enabled,
+		});
 
-        // Check if this is a dice roll choice
-        // Priority 1: Structured diceRoll data
-        if (choice.diceRoll?.enabled) {
-            setPendingChoice(choiceIndex);
-            setDiceConfig({
-                difficulty: choice.diceRoll.difficulty || 15,
-                type: choice.diceRoll.type || 'combat'
-            });
-            setShowDiceRoll(true);
-            return;
-        }
+		// Check if this is a dice roll choice
+		// Priority 1: Structured diceRoll data
+		if (choice.diceRoll?.enabled) {
+			setPendingChoice(choiceIndex);
+			setDiceConfig({
+				difficulty: choice.diceRoll.difficulty || 15,
+				type: choice.diceRoll.type || "combat",
+			});
+			setShowDiceRoll(true);
+			return;
+		}
 
-        // Priority 2: Legacy text parsing (backward compatibility)
-        // Check if this is a dice roll choice (but not an outcome choice like "≥18")
-        const isOutcomeChoice = choiceText.match(/^[[<≥\d]/); // Starts with [, <, ≥, or digit
-        const isLegacyDiceRoll = (choiceText.includes('1d20') || choiceText.includes('[COMBAT') || choiceText.includes('[FUITE')) && !isOutcomeChoice;
+		// Priority 2: Legacy text parsing (backward compatibility)
+		// Check if this is a dice roll choice (but not an outcome choice like "≥18")
+		const isOutcomeChoice = choiceText.match(/^[[<≥\d]/); // Starts with [, <, ≥, or digit
+		const isLegacyDiceRoll =
+			(choiceText.includes("1d20") ||
+				choiceText.includes("[COMBAT") ||
+				choiceText.includes("[FUITE")) &&
+			!isOutcomeChoice;
 
-        if (isLegacyDiceRoll) {
-            // Extract difficulty from choice text (e.g., "≥15" or "≥12")
-            const difficultyMatch = choiceText.match(/≥(\d+)/);
-            const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 15;
+		if (isLegacyDiceRoll) {
+			// Extract difficulty from choice text (e.g., "≥15" or "≥12")
+			const difficultyMatch = choiceText.match(/≥(\d+)/);
+			const difficulty = difficultyMatch ? parseInt(difficultyMatch[1]) : 15;
 
 			// Determine if it's combat or flee
 			const type =
@@ -176,30 +180,34 @@ const GamePlayer = () => {
 			return;
 		}
 
-        // Determine success based on difficulty
-        // We need to find the difficulty from the pending choice
-        const choice = currentPage.choices[pendingChoice ?? 0];
-        const difficulty = choice?.diceRoll?.difficulty || 15;
-        const isSuccess = total >= difficulty;
+		// Determine success based on difficulty
+		// We need to find the difficulty from the pending choice
+		const choice = currentPage.choices[pendingChoice ?? 0];
+		const difficulty = choice?.diceRoll?.difficulty || 15;
+		const isSuccess = total >= difficulty;
 
-        console.log('Dice Result Debug:', {
-            pendingChoice,
-            choice,
-            difficulty,
-            total,
-            isSuccess,
-            diceRollConfig: choice?.diceRoll
-        });
+		console.log("Dice Result Debug:", {
+			pendingChoice,
+			choice,
+			difficulty,
+			total,
+			isSuccess,
+			diceRollConfig: choice?.diceRoll,
+		});
 
-        // Pass the success status to the backend
-        await makeChoice(pendingChoice ?? 0, undefined, isSuccess);
+		// Pass the success status to the backend
+		await makeChoice(pendingChoice ?? 0, undefined, isSuccess);
 
-        setPendingChoice(null);
-        setDiceConfig(null);
-    };
+		setPendingChoice(null);
+		setDiceConfig(null);
+	};
 
-    const makeChoice = async (choiceIndex: number, hotspotIndex?: number, diceRollSuccess?: boolean) => {
-        if (!session || !currentPage) return;
+	const makeChoice = async (
+		choiceIndex: number,
+		hotspotIndex?: number,
+		diceRollSuccess?: boolean
+	) => {
+		if (!session || !currentPage) return;
 
 		try {
 			// Check if choice grants items or buffs (only for regular choices)
@@ -288,7 +296,12 @@ const GamePlayer = () => {
 				}
 			}
 
-            const response = await gameService.makeChoice(session._id, choiceIndex, hotspotIndex, diceRollSuccess);
+			const response = await gameService.makeChoice(
+				session._id,
+				choiceIndex,
+				hotspotIndex,
+				diceRollSuccess
+			);
 
 			setSession(response);
 			if (response.inventory) {
@@ -593,41 +606,50 @@ const GamePlayer = () => {
 						</div>
 					</div>
 
-                    {/* Dice Roller (in right column below content) */}
-                    {showDiceRoll && diceConfig && (
-                        <DiceRoller
-                            difficulty={diceConfig.difficulty}
-                            bonus={
-                                playerClass ? (
-                                    diceConfig.type === 'combat' ? (playerClass.combatBonus + statBuffs.combat) :
-                                        (diceConfig.type === 'flee' || diceConfig.type === 'stealth') ? (playerClass.fleeBonus + statBuffs.flee) :
-                                            0 // No bonus for persuasion/custom yet
-                                ) : (
-                                    // Default bonuses if no class selected
-                                    diceConfig.type === 'combat' ? statBuffs.combat :
-                                        (diceConfig.type === 'flee' || diceConfig.type === 'stealth') ? statBuffs.flee :
-                                            0
-                                )
-                            }
-                            bonusLabel={
-                                diceConfig.type === 'combat' ? 'Combat' :
-                                    (diceConfig.type === 'flee' || diceConfig.type === 'stealth') ? 'Fuite/Discrétion' :
-                                        diceConfig.type === 'persuasion' ? 'Persuasion' : 'Custom'
-                            }
-                            onResult={handleDiceResult}
-                        />
-                    )}
-                    {/* Choices Section */}
-                    {!currentPage.isEnding && !showDiceRoll && (
-                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 sticky top-6">
-                            <h3 className="text-xl font-semibold text-white mb-4">Que fais-tu ?</h3>
-                            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-                                {currentPage.choices.map((choice, index) => {
-                                    // Hide outcome choices (they're handled by dice rolls)
-                                    const isOutcomeChoice = choice.text.match(/^[[<≥\d]/); // Starts with [, <, ≥, or digit
-                                    if (isOutcomeChoice) {
-                                        return null; // Don't display outcome choices as buttons
-                                    }
+					{/* Dice Roller (in right column below content) */}
+					{showDiceRoll && diceConfig && (
+						<DiceRoller
+							difficulty={diceConfig.difficulty}
+							bonus={
+								playerClass
+									? diceConfig.type === "combat"
+										? playerClass.combatBonus + statBuffs.combat
+										: diceConfig.type === "flee" ||
+										  diceConfig.type === "stealth"
+										? playerClass.fleeBonus + statBuffs.flee
+										: 0 // No bonus for persuasion/custom yet
+									: // Default bonuses if no class selected
+									diceConfig.type === "combat"
+									? statBuffs.combat
+									: diceConfig.type === "flee" || diceConfig.type === "stealth"
+									? statBuffs.flee
+									: 0
+							}
+							bonusLabel={
+								diceConfig.type === "combat"
+									? "Combat"
+									: diceConfig.type === "flee" || diceConfig.type === "stealth"
+									? "Fuite/Discrétion"
+									: diceConfig.type === "persuasion"
+									? "Persuasion"
+									: "Custom"
+							}
+							onResult={handleDiceResult}
+						/>
+					)}
+					{/* Choices Section */}
+					{!currentPage.isEnding && !showDiceRoll && (
+						<div className="bg-gray-800 border border-gray-700 rounded-lg p-6 sticky top-6">
+							<h3 className="text-xl font-semibold text-white mb-4">
+								Que fais-tu ?
+							</h3>
+							<div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+								{currentPage.choices.map((choice, index) => {
+									// Hide outcome choices (they're handled by dice rolls)
+									const isOutcomeChoice = choice.text.match(/^[[<≥\d]/); // Starts with [, <, ≥, or digit
+									if (isOutcomeChoice) {
+										return null; // Don't display outcome choices as buttons
+									}
 
 									// Check if choice is class-specific
 									const isClassChoice =

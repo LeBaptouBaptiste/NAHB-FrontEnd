@@ -1,9 +1,23 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MainLayout } from "../components/templates/MainLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/atoms/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "../components/atoms/card";
 import { Button } from "../components/atoms/button";
-import { Library, BookOpen, FileText, TrendingUp, Award, Star, Loader2 } from "lucide-react";
+import {
+	Library,
+	BookOpen,
+	FileText,
+	TrendingUp,
+	Award,
+	Star,
+	Loader2,
+} from "lucide-react";
 import { userService, gameService, storyService } from "../api/services";
 import type { GameSession, Story } from "../api/services";
 
@@ -114,23 +128,23 @@ export function Dashboard() {
 		},
 	];
 
-  return (
-    <MainLayout>
-      <div className="container mx-auto px-6 py-12">
-        {/* Welcome Section */}
-        <div className="mb-12">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
-              <TrendingUp className="w-8 h-8 text-emerald-500" />
-            </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
-              Welcome back!
-            </h1>
-          </div>
-          <p className="text-muted-foreground text-lg ml-1">
-            Ready to continue your adventure or create something new?
-          </p>
-        </div>
+	return (
+		<MainLayout>
+			<div className="container mx-auto px-6 py-12">
+				{/* Welcome Section */}
+				<div className="mb-12">
+					<div className="flex items-center gap-3 mb-2">
+						<div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+							<TrendingUp className="w-8 h-8 text-emerald-500" />
+						</div>
+						<h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+							Welcome back!
+						</h1>
+					</div>
+					<p className="text-muted-foreground text-lg ml-1">
+						Ready to continue your adventure or create something new?
+					</p>
+				</div>
 
 				{/* Shortcuts */}
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -193,52 +207,71 @@ export function Dashboard() {
 					)}
 				</div>
 
-        {/* Recent Activity */}
-        <div className="mt-12">
-          <h2 className="mb-6">Continue Reading</h2>
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : continueReading.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {continueReading.map(({ session, story, progress }) => (
-                <Card key={session._id} className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/50 hover:shadow-lg transition-all duration-300">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle>{story.title}</CardTitle>
-                        <CardDescription>Author ID: {story.authorId.substring(0, 8)}...</CardDescription>
-                      </div>
-                      <div className="text-sm font-medium text-emerald-500">{Math.round(progress)}% complete</div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="w-full h-2.5 bg-muted/50 rounded-full overflow-hidden mb-4">
-                      <div className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-full" style={{ width: `${progress}%` }} />
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Last read: {session.history.length} pages visited
-                    </p>
-                    <Button className="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all" onClick={() => handleContinueStory(session._id)}>
-                      Continue Story
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No stories in progress. Start reading a story to continue here!</p>
-                <Button className="mt-4" onClick={() => navigate("/stories")}>
-                  Browse Stories
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
-    </MainLayout>
-  );
+				{/* Recent Activity */}
+				<div className="mt-12">
+					<h2 className="mb-6">Continue Reading</h2>
+					{loading ? (
+						<div className="flex justify-center py-12">
+							<Loader2 className="w-8 h-8 animate-spin text-primary" />
+						</div>
+					) : continueReading.length > 0 ? (
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+							{continueReading.map(({ session, story, progress }) => (
+								<Card
+									key={session._id}
+									className="bg-card/50 backdrop-blur-sm border-white/10 hover:border-emerald-500/50 hover:shadow-lg transition-all duration-300"
+								>
+									<CardHeader>
+										<div className="flex items-start justify-between">
+											<div>
+												<CardTitle>{story.title}</CardTitle>
+												<CardDescription>
+													Author ID: {story.authorId.substring(0, 8)}...
+												</CardDescription>
+											</div>
+											<div className="text-sm font-medium text-emerald-500">
+												{Math.round(progress)}% complete
+											</div>
+										</div>
+									</CardHeader>
+									<CardContent>
+										<div className="w-full h-2.5 bg-muted/50 rounded-full overflow-hidden mb-4">
+											<div
+												className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-full"
+												style={{ width: `${progress}%` }}
+											/>
+										</div>
+										<p className="text-sm text-muted-foreground mb-4">
+											Last read: {session.history.length} pages visited
+										</p>
+										<Button
+											className="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all"
+											onClick={() => handleContinueStory(session._id)}
+										>
+											Continue Story
+										</Button>
+									</CardContent>
+								</Card>
+							))}
+						</div>
+					) : (
+						<Card>
+							<CardContent className="py-12 text-center">
+								<p className="text-muted-foreground">
+									No stories in progress. Start reading a story to continue
+									here!
+								</p>
+								<Button
+									className="mt-4"
+									onClick={() => navigate("/stories")}
+								>
+									Browse Stories
+								</Button>
+							</CardContent>
+						</Card>
+					)}
+				</div>
+			</div>
+		</MainLayout>
+	);
 }

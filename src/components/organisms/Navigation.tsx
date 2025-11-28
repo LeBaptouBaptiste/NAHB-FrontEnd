@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, Home, Library, FileText, Shield, LogOut, Menu, X } from "lucide-react";
+import {
+	BookOpen,
+	Home,
+	Library,
+	FileText,
+	Shield,
+	LogOut,
+	Menu,
+	X,
+} from "lucide-react";
 import { Button } from "../atoms/button";
 import { NavButton } from "../atoms/NavigationButton";
 import { useAuth } from "../../context/AuthContext";

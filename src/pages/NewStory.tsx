@@ -5,9 +5,25 @@ import { Button } from "../components/atoms/button";
 import { Input } from "../components/atoms/input";
 import { Label } from "../components/atoms/label";
 import { Textarea } from "../components/atoms/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/atoms/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/atoms/tabs";
-import { storyService, pageService, aiService, uploadService } from "../api/services";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "../components/atoms/card";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "../components/atoms/tabs";
+import {
+	storyService,
+	pageService,
+	aiService,
+	uploadService,
+} from "../api/services";
 import { Loader2, Wand2, BookOpen, Upload, Trash2 } from "lucide-react";
 import imageCompression from "browser-image-compression";
 
@@ -160,22 +176,24 @@ export function NewStory() {
 		}
 	};
 
-  return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[80vh]">
-        <Card className="w-full max-w-2xl bg-card/60 backdrop-blur-md border-white/10 shadow-2xl">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold text-gradient">Create New Story</CardTitle>
-            <CardDescription className="text-base">
-              Choose how you want to start your new adventure
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md mb-4">
-                {error}
-              </div>
-            )}
+	return (
+		<MainLayout>
+			<div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[80vh]">
+				<Card className="w-full max-w-2xl bg-card/60 backdrop-blur-md border-white/10 shadow-2xl">
+					<CardHeader>
+						<CardTitle className="text-3xl font-bold text-gradient">
+							Create New Story
+						</CardTitle>
+						<CardDescription className="text-base">
+							Choose how you want to start your new adventure
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						{error && (
+							<div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md mb-4">
+								{error}
+							</div>
+						)}
 
 						<Tabs
 							defaultValue="manual"
@@ -350,28 +368,28 @@ export function NewStory() {
 									</div>
 								</div>
 
-                <Button
-                  className="w-full mt-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer"
-                  onClick={handleAiGenerate}
-                  disabled={loading || !aiPrompt}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Generating Story...
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="w-4 h-4 mr-2" />
-                      Generate Story
-                    </>
-                  )}
-                </Button>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
-    </MainLayout>
-  );
+								<Button
+									className="w-full mt-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer"
+									onClick={handleAiGenerate}
+									disabled={loading || !aiPrompt}
+								>
+									{loading ? (
+										<>
+											<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+											Generating Story...
+										</>
+									) : (
+										<>
+											<Wand2 className="w-4 h-4 mr-2" />
+											Generate Story
+										</>
+									)}
+								</Button>
+							</TabsContent>
+						</Tabs>
+					</CardContent>
+				</Card>
+			</div>
+		</MainLayout>
+	);
 }

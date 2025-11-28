@@ -4,28 +4,28 @@ import { Badge } from "../atoms/badge";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 
 interface StoryCardProps {
-  id: string;
-  title: string;
-  description: string;
-  tags: string[];
-  rating: number;
-  plays: number;
-  author?: string;
-  imageUrl?: string;
-  onClick?: () => void;
-  onExport?: () => void;
+	id: string;
+	title: string;
+	description: string;
+	tags: string[];
+	rating: number;
+	plays: number;
+	author?: string;
+	imageUrl?: string;
+	onClick?: () => void;
+	onExport?: () => void;
 }
 
 export function StoryCard({
-  title,
-  description,
-  tags,
-  rating,
-  plays,
-  author,
-  imageUrl,
-  onClick,
-  onExport
+	title,
+	description,
+	tags,
+	rating,
+	plays,
+	author,
+	imageUrl,
+	onClick,
+	onExport,
 }: StoryCardProps) {
 	return (
 		<Card
@@ -68,32 +68,52 @@ export function StoryCard({
 				</p>
 			</CardContent>
 
-      <CardFooter className="flex items-center justify-between pt-3 border-t border-border/50">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 text-sm font-medium">
-            <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-            <span>{rating > 0 ? rating.toFixed(1) : 'New'}</span>
-          </div>
+			<CardFooter className="flex items-center justify-between pt-3 border-t border-border/50">
+				<div className="flex items-center gap-3">
+					<div className="flex items-center gap-1 text-sm font-medium">
+						<Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+						<span>{rating > 0 ? rating.toFixed(1) : "New"}</span>
+					</div>
 
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Eye className="w-4 h-4" />
-            <span>{plays.toLocaleString()}</span>
-          </div>
-        </div>
+					<div className="flex items-center gap-1 text-sm text-muted-foreground">
+						<Eye className="w-4 h-4" />
+						<span>{plays.toLocaleString()}</span>
+					</div>
+				</div>
 
-        {onExport && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onExport();
-            }}
-            className="p-1.5 hover:bg-emerald-500/10 rounded-full text-emerald-500 transition-colors"
-            title="Export Story"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
-          </button>
-        )}
-      </CardFooter>
-    </Card>
-  );
+				{onExport && (
+					<button
+						onClick={(e) => {
+							e.stopPropagation();
+							onExport();
+						}}
+						className="p-1.5 hover:bg-emerald-500/10 rounded-full text-emerald-500 transition-colors"
+						title="Export Story"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							className="lucide lucide-download"
+						>
+							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+							<polyline points="7 10 12 15 17 10" />
+							<line
+								x1="12"
+								x2="12"
+								y1="15"
+								y2="3"
+							/>
+						</svg>
+					</button>
+				)}
+			</CardFooter>
+		</Card>
+	);
 }

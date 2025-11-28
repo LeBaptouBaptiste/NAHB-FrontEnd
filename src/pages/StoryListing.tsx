@@ -5,16 +5,22 @@ import { StoryCard } from "../components/molecules/StoryCard";
 import { Input } from "../components/atoms/input";
 import { Button } from "../components/atoms/button";
 import { Badge } from "../components/atoms/badge";
-import { Search, SlidersHorizontal, Loader2, Library, Upload } from "lucide-react";
+import {
+	Search,
+	SlidersHorizontal,
+	Loader2,
+	Library,
+	Upload,
+} from "lucide-react";
 import { storyService, ratingService, migrationService } from "../api/services";
 import type { Story } from "../api/services";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuCheckboxItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
 } from "../components/atoms/dropdown-menu";
 import { toast } from "sonner";
 
@@ -75,45 +81,47 @@ export function StoryListing() {
 			})
 		);
 
-    setRatings(ratingsMap);
-  };
+		setRatings(ratingsMap);
+	};
 
-  const handleExport = async (storyId: string, title: string) => {
-    try {
-      const blob = await migrationService.exportStory(storyId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_export.zip`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success("Story exported successfully!");
-    } catch (error) {
-      console.error("Failed to export story:", error);
-      toast.error("Failed to export story.");
-    }
-  };
+	const handleExport = async (storyId: string, title: string) => {
+		try {
+			const blob = await migrationService.exportStory(storyId);
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `${title
+				.replace(/[^a-z0-9]/gi, "_")
+				.toLowerCase()}_export.zip`;
+			document.body.appendChild(a);
+			a.click();
+			window.URL.revokeObjectURL(url);
+			document.body.removeChild(a);
+			toast.success("Story exported successfully!");
+		} catch (error) {
+			console.error("Failed to export story:", error);
+			toast.error("Failed to export story.");
+		}
+	};
 
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      try {
-        setLoading(true);
-        await migrationService.importStory(file);
-        toast.success("Story imported successfully!");
-        loadStories(); // Reload list
-      } catch (error: any) {
-        console.error("Failed to import story:", error);
-        toast.error(error.response?.data?.message || "Failed to import story.");
-      } finally {
-        setLoading(false);
-        // Reset input
-        e.target.value = '';
-      }
-    }
-  };
+	const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (e.target.files && e.target.files[0]) {
+			const file = e.target.files[0];
+			try {
+				setLoading(true);
+				await migrationService.importStory(file);
+				toast.success("Story imported successfully!");
+				loadStories(); // Reload list
+			} catch (error: any) {
+				console.error("Failed to import story:", error);
+				toast.error(error.response?.data?.message || "Failed to import story.");
+			} finally {
+				setLoading(false);
+				// Reset input
+				e.target.value = "";
+			}
+		}
+	};
 
 	const toggleTag = (tag: string) => {
 		setSelectedTags((prev) =>
@@ -128,39 +136,42 @@ export function StoryListing() {
 		return matchesTags;
 	});
 
-  return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
-                <Library className="w-8 h-8 text-emerald-500" />
-              </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
-                Library
-              </h1>
-            </div>
-            <p className="text-muted-foreground text-lg ml-1">
-              Browse through thousands of interactive adventures
-            </p>
-          </div>
+	return (
+		<MainLayout>
+			<div className="container mx-auto px-4 py-8">
+				<div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+					<div>
+						<div className="flex items-center gap-3 mb-2">
+							<div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+								<Library className="w-8 h-8 text-emerald-500" />
+							</div>
+							<h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+								Library
+							</h1>
+						</div>
+						<p className="text-muted-foreground text-lg ml-1">
+							Browse through thousands of interactive adventures
+						</p>
+					</div>
 
-          <div className="flex gap-2">
-            <div className="relative">
-              <input
-                type="file"
-                accept=".zip"
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                onChange={handleImport}
-              />
-              <Button variant="outline" className="gap-2 border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-500">
-                <Upload className="w-4 h-4" />
-                Import Story
-              </Button>
-            </div>
-          </div>
-        </div>
+					<div className="flex gap-2">
+						<div className="relative">
+							<input
+								type="file"
+								accept=".zip"
+								className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+								onChange={handleImport}
+							/>
+							<Button
+								variant="outline"
+								className="gap-2 border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-500"
+							>
+								<Upload className="w-4 h-4" />
+								Import Story
+							</Button>
+						</div>
+					</div>
+				</div>
 
 				{/* Search and Filter */}
 				<div className="mb-8 space-y-6">
@@ -262,37 +273,42 @@ export function StoryListing() {
 					)}
 				</div>
 
-        {/* Story Grid */}
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredStories.map(story => (
-              <StoryCard
-                key={story._id}
-                id={story._id}
-                title={story.title}
-                description={story.description}
-                tags={story.tags}
-                rating={ratings[story._id] || 0}
-                plays={story.stats?.views || 0}
-                author={story.authorId}
-                imageUrl={story.imageUrl || "https://images.unsplash.com/photo-1534447677768-be436bb09401?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYW50YXN5JTIwbGFuZHNjYXBlfGVufDF8fHx8MTc2Mzk5NjkzMXww&ixlib=rb-4.1.0&q=80&w=1080"}
-                onClick={() => navigate(`/story/${story._id}`)}
-                onExport={() => handleExport(story._id, story.title)}
-              />
-            ))}
-          </div>
-        )}
+				{/* Story Grid */}
+				{loading ? (
+					<div className="flex justify-center py-12">
+						<Loader2 className="w-8 h-8 animate-spin text-primary" />
+					</div>
+				) : (
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						{filteredStories.map((story) => (
+							<StoryCard
+								key={story._id}
+								id={story._id}
+								title={story.title}
+								description={story.description}
+								tags={story.tags}
+								rating={ratings[story._id] || 0}
+								plays={story.stats?.views || 0}
+								author={story.authorId}
+								imageUrl={
+									story.imageUrl ||
+									"https://images.unsplash.com/photo-1534447677768-be436bb09401?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYW50YXN5JTIwbGFuZHNjYXBlfGVufDF8fHx8MTc2Mzk5NjkzMXww&ixlib=rb-4.1.0&q=80&w=1080"
+								}
+								onClick={() => navigate(`/story/${story._id}`)}
+								onExport={() => handleExport(story._id, story.title)}
+							/>
+						))}
+					</div>
+				)}
 
-        {!loading && filteredStories.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No stories found matching your criteria.</p>
-          </div>
-        )}
-      </div>
-    </MainLayout>
-  );
+				{!loading && filteredStories.length === 0 && (
+					<div className="text-center py-12">
+						<p className="text-muted-foreground">
+							No stories found matching your criteria.
+						</p>
+					</div>
+				)}
+			</div>
+		</MainLayout>
+	);
 }
